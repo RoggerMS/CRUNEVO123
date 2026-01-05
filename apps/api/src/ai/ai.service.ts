@@ -27,7 +27,8 @@ export class AiService {
     if (!question) return;
 
     // AI Logic (Mock)
-    const suggestion = `🤖 [AI Suggestion]: He analizado tu pregunta "${question.title}". Basado en los apuntes disponibles, te sugiero revisar los conceptos fundamentales de la materia. También podrías buscar documentos relacionados con los tags: ${question.tags || 'general'}.`;
+    const tags = Array.isArray(question.tags) && question.tags.length ? question.tags.join(', ') : 'general';
+    const suggestion = `🤖 [AI Suggestion]: He analizado tu pregunta "${question.title}". Basado en los apuntes disponibles, te sugiero revisar los conceptos fundamentales de la materia. También podrías buscar documentos relacionados con los tags: ${tags}.`;
 
     await this.prisma.answer.create({
       data: {

@@ -155,6 +155,9 @@ export class AdminService {
       case 'question':
       case 'questions':
         return this.prisma.question.update({ where: { id }, data: { status: validStatus as any } });
+      case 'answer':
+      case 'answers':
+        return this.prisma.answer.update({ where: { id }, data: { status: validStatus as any } });
       default:
         throw new Error('Unknown content type or status update not supported');
     }
@@ -174,6 +177,9 @@ export class AdminService {
       case 'question':
       case 'questions':
         return this.prisma.question.delete({ where: { id } });
+      case 'answer':
+      case 'answers':
+        return this.prisma.answer.delete({ where: { id } });
       case 'club':
       case 'clubs':
         return this.prisma.club.delete({ where: { id } });

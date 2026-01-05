@@ -171,7 +171,9 @@ async function main() {
           data: {
               title: faker.lorem.sentence() + "?",
               body: faker.lorem.paragraphs(2),
-              tags: "duda,urgente,examen",
+              tags: ["duda", "urgente", "examen"],
+              subject: faker.helpers.arrayElement(["Matemáticas", "Biología", "Historia", "Programación", "Derecho"]),
+              attachments: i % 5 === 0 ? ["https://placehold.co/600x400"] : [],
               authorId: author.id,
               clubId: i % 4 === 0 ? clubs[Math.floor(Math.random() * clubs.length)].id : null,
           }
