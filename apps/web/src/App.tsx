@@ -11,6 +11,7 @@ import QuestionDetail from './pages/QuestionDetail';
 import AdminPanel from './pages/AdminPanel';
 import Profile from './pages/Profile';
 import Clubs from './pages/Clubs';
+import CreateClub from './pages/CreateClub';
 import ClubDetail from './pages/ClubDetail';
 import Aula from './pages/Aula';
 import Apuntes from './pages/Apuntes';
@@ -178,6 +179,7 @@ function AppContent() {
           <Route path="/questions/:id" element={<Navigate to="/aula/:id" />} />
           
           <Route path="/users/:id/profile" element={<PrivateRoute><Profile /></PrivateRoute>} />
+          <Route path="/clubs/new" element={<PrivateRoute><CreateClub /></PrivateRoute>} />
           <Route path="/clubs" element={<PrivateRoute><Clubs /></PrivateRoute>} />
           <Route path="/clubs/:id" element={<PrivateRoute><ClubDetail /></PrivateRoute>} />
           <Route path="/events" element={<PrivateRoute><Events /></PrivateRoute>} />

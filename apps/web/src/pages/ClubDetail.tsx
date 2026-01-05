@@ -69,10 +69,13 @@ export default function ClubDetail() {
   if (loading) return <div>Loading...</div>;
   if (error) return <div className="error">{error}</div>;
   if (!club) return <div>Club not found</div>;
+  const cover = club.coverImageUrl || 'https://images.unsplash.com/photo-1523580846011-d3a5bc25702b?auto=format&fit=crop&w=1200&q=60';
 
   return (
     <div className="container">
-      <div className="card" style={{ padding: '2rem', textAlign: 'center' }}>
+      <div className="card" style={{ padding: 0, overflow: 'hidden' }}>
+        <div style={{ width: '100%', aspectRatio: '16 / 9', backgroundImage: `url(${cover})`, backgroundSize: 'cover', backgroundPosition: 'center' }} />
+        <div style={{ padding: '1.5rem', textAlign: 'center' }}>
         <h1>{club.name}</h1>
         <p>{club.description}</p>
         <div className="meta">Created by @{club.owner.username} • {club._count.members} Members</div>
@@ -86,6 +89,7 @@ export default function ClubDetail() {
             ) : (
                 <button onClick={handleJoin} className="btn">Unirse al Club</button>
             )}
+        </div>
         </div>
       </div>
 
