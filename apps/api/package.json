@@ -19,7 +19,7 @@
     "test:debug": "node --inspect-brk -r tsconfig-paths/register -r ts-node/register node_modules/.bin/jest --runInBand",
     "test:e2e": "jest --config ./test/jest-e2e.json",
     "verify:mvp": "node ../../scripts/verify_mvp.js",
-    "seed:community": "ts-node prisma/seed_community.ts"
+    "seed:community": "ts-node --project tsconfig.seed.json prisma/seed_community.ts"
   },
   "dependencies": {
     "@nestjs/common": "^11.0.1",
@@ -72,7 +72,7 @@
     "typescript-eslint": "^8.20.0"
   },
   "prisma": {
-    "seed": "ts-node prisma/seed.ts"
+    "seed": "ts-node --project tsconfig.seed.json prisma/seed.ts"
   },
   "jest": {
     "moduleFileExtensions": [
