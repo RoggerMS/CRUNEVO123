@@ -1,5 +1,13 @@
 # Changelog
 
+## [Unreleased]
+### Added
+- Modelo y endpoints de administración para gestionar elementos destacados del sidebar del feed.
+- Soporte en el feed para mostrar ítems dinámicos de publicidad, cursos, eventos y productos.
+- Nueva sección en el panel de administración para crear, editar y ordenar elementos del sidebar.
+### Changed
+- Diseño del feed actualizado para mejor respuesta en móviles y métricas rápidas.
+
 ## [Iteración 5] - 2026-01-03
 ### Added
 - Stubs para IA (`ai_stub`) y Cursos (`courses_stub`).

@@ -22,17 +22,22 @@ export default function Feed() {
   const [expandedComments, setExpandedComments] = useState<Record<string, boolean>>({});
   const [commentsData, setCommentsData] = useState<Record<string, any[]>>({});
   const [newCommentBody, setNewCommentBody] = useState<Record<string, string>>({});
+  const [sidebarItems, setSidebarItems] = useState<any[]>([]);
 
   const loadFeed = () => {
     setLoading(true);
     setError('');
-    api.get('/feed')
+    Promise.all([
+      api.get('/feed'),
+      api.get('/feed/sidebar-items').catch(() => ({ data: [] }))
+    ])
       .then((res) => {
-        const data = res.data;
+        const data = res[0].data;
         setItems(data);
         const v: Record<string, number> = {};
         data.forEach((it: any) => { v[it.id] = (views[it.id] || 0) + 1; });
         setViews(v);
+        setSidebarItems(Array.isArray(res[1].data) ? res[1].data : []);
         setLoading(false);
       })
       .catch((err) => {
@@ -146,12 +151,26 @@ export default function Feed() {
   }
 
   return (
-    <div>
-      <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: '1rem' }}>
-        <h1>Feed</h1>
+    <div className="feed-container">
+      <div className="feed-header">
+        <div>
+          <p className="feed-eyebrow">Bienvenido</p>
+          <h1>Feed</h1>
+          <p className="feed-subtitle">Comparte novedades y descubre cursos, eventos y productos educativos.</p>
+        </div>
+        <div className="feed-summary">
+          <div>
+            <strong>{items.length}</strong>
+            <span>elementos</span>
+          </div>
+          <div>
+            <strong>{notifications.length}</strong>
+            <span>avisos</span>
+          </div>
+        </div>
       </div>
 
-      <div style={{ display: 'grid', gridTemplateColumns: '2fr 1fr', gap: '2rem' }}>
+      <div className="feed-grid">
         <div>
           <div className="card" style={{ padding: '1rem', marginBottom: '2rem' }}>
             <form onSubmit={handlePost}>
@@ -381,13 +400,44 @@ export default function Feed() {
             )}
           </div>
 
-          <div className="card" style={{ marginBottom: '1rem' }}>
-            <h3>Publicidad</h3>
-            <div style={{ display: 'grid', gap: '10px' }}>
-              <div style={{ border: '1px dashed #e5e7eb', padding: '12px' }}>Curso destacado</div>
-              <div style={{ border: '1px dashed #e5e7eb', padding: '12px' }}>Evento próximo</div>
-              <div style={{ border: '1px dashed #e5e7eb', padding: '12px' }}>Producto educativo</div>
+          <div className="card sidebar-card">
+            <div className="sidebar-header">
+              <div>
+                <p className="feed-eyebrow">Sección destacada</p>
+                <h3>Publicidad y recursos</h3>
+              </div>
+              <span className="badge">Feed</span>
             </div>
+            {sidebarItems.length === 0 ? (
+              <div className="sidebar-empty">Aún no hay elementos configurados.</div>
+            ) : (
+              <div className="sidebar-grid">
+                {sidebarItems.map((item) => (
+                  <div key={item.id} className="sidebar-item">
+                    <div className="sidebar-item-top">
+                      <div>
+                        <p className="sidebar-type">{item.type?.replace('_', ' ')}</p>
+                        <h4>{item.title}</h4>
+                      </div>
+                      {item.badge && <span className="badge">{item.badge}</span>}
+                    </div>
+                    {item.imageUrl && (
+                      <div className="sidebar-thumb">
+                        <img src={item.imageUrl} alt={item.title} />
+                      </div>
+                    )}
+                    {item.description && <p className="sidebar-description">{item.description}</p>}
+                    <div className="sidebar-actions">
+                      {item.link && (
+                        <a href={item.link} target="_blank" rel="noreferrer" className="btn btn-outline">
+                          {item.ctaLabel || 'Ver más'}
+                        </a>
+                      )}
+                    </div>
+                  </div>
+                ))}
+              </div>
+            )}
           </div>
 
           <div className="card">

@@ -59,6 +59,13 @@ enum DocumentStatus {
   REJECTED
 }
 
+enum SidebarItemType {
+  AD
+  FEATURED_COURSE
+  UPCOMING_EVENT
+  EDUCATIONAL_PRODUCT
+}
+
 model User {
   id              String    @id @default(uuid())
   email           String    @unique
@@ -368,6 +375,21 @@ model Notification {
   isRead    Boolean          @default(false)
   link      String?
   createdAt DateTime         @default(now())
+}
+
+model SidebarItem {
+  id            String          @id @default(uuid())
+  type          SidebarItemType
+  title         String
+  description   String?
+  link          String?
+  imageUrl      String?
+  badge         String?
+  ctaLabel      String?
+  isActive      Boolean         @default(true)
+  displayOrder  Int             @default(0)
+  createdAt     DateTime        @default(now())
+  updatedAt     DateTime        @updatedAt
 }
 
 enum EventStatus {

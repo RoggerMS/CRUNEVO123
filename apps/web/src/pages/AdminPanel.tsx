@@ -4,7 +4,7 @@ import { Trash2, UserCheck, Ban, Edit, X, Eye, EyeOff, RotateCcw } from 'lucide-
 import { ErrorBoundary } from '../components/ErrorBoundary';
 
 function AdminPanelContent() {
-  const [activeTab, setActiveTab] = useState<'reports' | 'users' | 'content'>('reports');
+  const [activeTab, setActiveTab] = useState<'reports' | 'users' | 'content' | 'sidebar'>('reports');
   const [reports, setReports] = useState<any[]>([]);
   const [users, setUsers] = useState<any[]>([]);
   const [contentList, setContentList] = useState<any[]>([]);
@@ -14,6 +14,19 @@ function AdminPanelContent() {
   const [userSearch, setUserSearch] = useState('');
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState('');
+  const [sidebarItems, setSidebarItems] = useState<any[]>([]);
+  const [sidebarForm, setSidebarForm] = useState<any>({
+    id: '',
+    type: 'AD',
+    title: '',
+    description: '',
+    link: '',
+    imageUrl: '',
+    badge: '',
+    ctaLabel: '',
+    isActive: true,
+    displayOrder: 0,
+  });
   
   // Edit User State
   const [editingUser, setEditingUser] = useState<any>(null);
@@ -58,6 +71,8 @@ function AdminPanelContent() {
         });
     } else if (activeTab === 'content') {
         fetchContent();
+    } else if (activeTab === 'sidebar') {
+        fetchSidebarItems();
     } else {
       fetchUsers();
     }
@@ -75,15 +90,29 @@ function AdminPanelContent() {
       .then(res => {
           // Handle both { items: [], total: 0 } and [] formats
           const list = res.data.items || (Array.isArray(res.data) ? res.data : []);
-          setContentList(list);
-          setLoading(false);
-      })
+      setContentList(list);
+      setLoading(false);
+  })
       .catch(err => {
           console.error("Fetch Content Error", err);
           setContentList([]);
           setError('Failed to load content');
           setLoading(false);
       });
+  };
+
+  const fetchSidebarItems = () => {
+      api.get('/admin/sidebar-items')
+        .then(res => {
+            setSidebarItems(Array.isArray(res.data) ? res.data : []);
+            setLoading(false);
+        })
+        .catch(err => {
+            console.error("Fetch Sidebar Error", err);
+            setSidebarItems([]);
+            setError('Failed to load sidebar items');
+            setLoading(false);
+        });
   };
 
   const fetchUsers = () => {
@@ -162,6 +191,46 @@ function AdminPanelContent() {
     }
   };
 
+  const handleSidebarSubmit = async (e: React.FormEvent) => {
+      e.preventDefault();
+      try {
+          if (sidebarForm.id) {
+              await api.post(`/admin/sidebar-items/${sidebarForm.id}`, sidebarForm);
+          } else {
+              await api.post('/admin/sidebar-items', sidebarForm);
+          }
+          setSidebarForm({
+              id: '',
+              type: 'AD',
+              title: '',
+              description: '',
+              link: '',
+              imageUrl: '',
+              badge: '',
+              ctaLabel: '',
+              isActive: true,
+              displayOrder: 0,
+          });
+          fetchSidebarItems();
+      } catch (error) {
+          alert('No se pudo guardar el elemento');
+      }
+  };
+
+  const handleEditSidebar = (item: any) => {
+      setSidebarForm({ ...item });
+  };
+
+  const handleDeleteSidebar = async (id: string) => {
+      if (!confirm('¿Eliminar este elemento?')) return;
+      try {
+          await api.delete(`/admin/sidebar-items/${id}`);
+          fetchSidebarItems();
+      } catch (error) {
+          alert('No se pudo eliminar el elemento');
+      }
+  };
+
   if (error) return <div className="error">{error} <button className="btn btn-sm btn-outline" onClick={() => fetchData()}>Retry</button></div>;
 
   return (
@@ -180,6 +249,12 @@ function AdminPanelContent() {
             onClick={() => setActiveTab('content')}
           >
             Content
+          </button>
+          <button 
+            className={`btn ${activeTab === 'sidebar' ? '' : 'btn-outline'}`}
+            onClick={() => setActiveTab('sidebar')}
+          >
+            Feed Sidebar
           </button>
           <button 
             className={`btn ${activeTab === 'users' ? '' : 'btn-outline'}`}
@@ -369,6 +444,122 @@ function AdminPanelContent() {
               {reports.length === 0 && <tr><td colSpan={5} style={{ textAlign: 'center', padding: '2rem' }}>No reports found</td></tr>}
             </tbody>
           </table>
+        </div>
+      )}
+
+      {activeTab === 'sidebar' && (
+        <div className="card" style={{ display: 'grid', gap: '1rem' }}>
+            <h2>Sidebar del feed</h2>
+            <form onSubmit={handleSidebarSubmit} style={{ display: 'grid', gap: '0.75rem' }}>
+                <div style={{ display: 'grid', gap: '0.75rem', gridTemplateColumns: 'repeat(auto-fit, minmax(220px, 1fr))' }}>
+                    <div>
+                        <label>Tipo</label>
+                        <select value={sidebarForm.type} onChange={e => setSidebarForm({ ...sidebarForm, type: e.target.value })}>
+                            <option value="AD">Publicidad</option>
+                            <option value="FEATURED_COURSE">Curso destacado</option>
+                            <option value="UPCOMING_EVENT">Evento próximo</option>
+                            <option value="EDUCATIONAL_PRODUCT">Producto educativo</option>
+                        </select>
+                    </div>
+                    <div>
+                        <label>Orden</label>
+                        <input 
+                          type="number" 
+                          value={sidebarForm.displayOrder} 
+                          onChange={e => {
+                            const val = e.target.value;
+                            setSidebarForm({ ...sidebarForm, displayOrder: val === '' ? 0 : parseInt(val) });
+                          }} 
+                        />
+                    </div>
+                    <div>
+                        <label>Activo</label>
+                        <select value={sidebarForm.isActive ? 'true' : 'false'} onChange={e => setSidebarForm({ ...sidebarForm, isActive: e.target.value === 'true' })}>
+                            <option value="true">Sí</option>
+                            <option value="false">No</option>
+                        </select>
+                    </div>
+                </div>
+                <div>
+                    <label>Título</label>
+                    <input value={sidebarForm.title} onChange={e => setSidebarForm({ ...sidebarForm, title: e.target.value })} required />
+                </div>
+                <div>
+                    <label>Descripción</label>
+                    <textarea value={sidebarForm.description} onChange={e => setSidebarForm({ ...sidebarForm, description: e.target.value })} rows={3} />
+                </div>
+                <div style={{ display: 'grid', gap: '0.75rem', gridTemplateColumns: 'repeat(auto-fit, minmax(220px, 1fr))' }}>
+                    <div>
+                        <label>Enlace</label>
+                        <input value={sidebarForm.link} onChange={e => setSidebarForm({ ...sidebarForm, link: e.target.value })} />
+                    </div>
+                    <div>
+                        <label>Imagen (URL)</label>
+                        <input value={sidebarForm.imageUrl} onChange={e => setSidebarForm({ ...sidebarForm, imageUrl: e.target.value })} />
+                    </div>
+                    <div>
+                        <label>Etiqueta</label>
+                        <input value={sidebarForm.badge} onChange={e => setSidebarForm({ ...sidebarForm, badge: e.target.value })} />
+                    </div>
+                    <div>
+                        <label>Texto CTA</label>
+                        <input value={sidebarForm.ctaLabel} onChange={e => setSidebarForm({ ...sidebarForm, ctaLabel: e.target.value })} />
+                    </div>
+                </div>
+                <div style={{ display: 'flex', gap: '0.5rem', justifyContent: 'flex-end' }}>
+                    {sidebarForm.id && (
+                        <button type="button" className="btn btn-outline" onClick={() => setSidebarForm({
+                            id: '',
+                            type: 'AD',
+                            title: '',
+                            description: '',
+                            link: '',
+                            imageUrl: '',
+                            badge: '',
+                            ctaLabel: '',
+                            isActive: true,
+                            displayOrder: 0,
+                        })}>
+                            Cancelar edición
+                        </button>
+                    )}
+                    <button className="btn" type="submit">{sidebarForm.id ? 'Actualizar' : 'Crear'}</button>
+                </div>
+            </form>
+
+            <div style={{ overflowX: 'auto' }}>
+                <table>
+                    <thead>
+                        <tr style={{ background: '#f8f9fa' }}>
+                            <th>Orden</th>
+                            <th>Título</th>
+                            <th>Tipo</th>
+                            <th>Estado</th>
+                            <th>Acciones</th>
+                        </tr>
+                    </thead>
+                    <tbody>
+                        {sidebarItems.map(item => (
+                            <tr key={item.id}>
+                                <td>{item.displayOrder}</td>
+                                <td>
+                                    <div style={{ fontWeight: 'bold' }}>{item.title}</div>
+                                    <div style={{ color: '#6b7280', fontSize: '0.9rem' }}>{item.description}</div>
+                                </td>
+                                <td>{item.type}</td>
+                                <td>{item.isActive ? <span className="badge" style={{ background: '#28a745' }}>Activo</span> : <span className="badge" style={{ background: '#e5e7eb', color: '#111' }}>Oculto</span>}</td>
+                                <td>
+                                    <div style={{ display: 'flex', gap: '6px' }}>
+                                        <button className="btn btn-sm" onClick={() => handleEditSidebar(item)}>Editar</button>
+                                        <button className="btn btn-sm btn-outline" onClick={() => handleDeleteSidebar(item.id)} style={{ background: '#dc3545', color: '#fff' }}>Eliminar</button>
+                                    </div>
+                                </td>
+                            </tr>
+                        ))}
+                        {sidebarItems.length === 0 && <tr><td colSpan={5} style={{ textAlign: 'center', padding: '1rem' }}>No hay elementos aún</td></tr>}
+                    </tbody>
+                </table>
+            </div>
         </div>
       )}
 

@@ -11,4 +11,9 @@ export class FeedController {
   getFeed() {
     return this.feedService.getFeed();
   }
+
+  @Get('sidebar-items')
+  getSidebarItems() {
+    return this.feedService.getSidebarItems();
+  }
 }

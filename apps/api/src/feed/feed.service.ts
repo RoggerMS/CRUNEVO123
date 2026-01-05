@@ -48,4 +48,14 @@ export class FeedService {
     
     return feedItems.slice(0, limit);
   }
+
+  async getSidebarItems() {
+    return this.prisma.sidebarItem.findMany({
+      where: { isActive: true },
+      orderBy: [
+        { displayOrder: 'asc' },
+        { createdAt: 'desc' },
+      ],
+    });
+  }
 }
