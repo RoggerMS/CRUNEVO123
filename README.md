@@ -6,6 +6,16 @@ MVP educativo/social en monorepo con **NestJS + Prisma + PostgreSQL** para el ba
 - Node.js 18+
 - Docker & Docker Compose
 
+## Despliegue rápido con Docker (Windows/WSL)
+1. **Arranca Docker Desktop** y espera a que muestre estado **Running** (si ves `open //./pipe/dockerDesktopLinuxEngine`, el engine no está arriba).
+2. Copia variables: `cp .env.example .env` (puedes ajustar puertos/URLs si lo necesitas).
+3. Construye imágenes: `docker compose build --pull`
+4. Levanta servicios: `docker compose up -d`
+5. Verifica estado: `docker compose ps` (Postgres debe verse `healthy`).
+6. (Opcional) Semilla de datos: `docker compose exec api npx prisma db seed`
+
+Accesos: Web http://localhost • API http://localhost:3000 • Adminer http://localhost:8082 (server: `postgres`, user: `postgres`, pass: `CrunevoSecurePwd2024!`).
+
 ## Guía rápida (onboarding)
 ### 1) Configurar entorno y base de datos
 ```bash
