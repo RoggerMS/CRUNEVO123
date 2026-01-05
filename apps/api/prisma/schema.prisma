@@ -121,6 +121,7 @@ model Club {
   id          String   @id @default(uuid())
   name        String
   description String?
+  coverImageUrl String?
   isPublic    Boolean  @default(true)
   ownerId     String
   owner       User     @relation("ClubOwner", fields: [ownerId], references: [id])
