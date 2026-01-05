@@ -187,4 +187,81 @@ export class AdminService {
         throw new Error('Unknown content type');
     }
   }
+
+  // Sidebar Items
+  getSidebarItems() {
+    return this.prisma.sidebarItem.findMany({
+      orderBy: [
+        { displayOrder: 'asc' },
+        { createdAt: 'desc' },
+      ],
+    });
+  }
+
+  async createSidebarItem(data: {
+    type: string;
+    title: string;
+    description?: string;
+    link?: string;
+    imageUrl?: string;
+    badge?: string;
+    ctaLabel?: string;
+    isActive?: boolean;
+    displayOrder?: number;
+  }) {
+    const parsed = this.parseSidebarItemData(data);
+    return this.prisma.sidebarItem.create({ data: parsed });
+  }
+
+  async updateSidebarItem(id: string, data: {
+    type?: string;
+    title?: string;
+    description?: string;
+    link?: string;
+    imageUrl?: string;
+    badge?: string;
+    ctaLabel?: string;
+    isActive?: boolean;
+    displayOrder?: number;
+  }) {
+    const parsed = this.parseSidebarItemData(data);
+    return this.prisma.sidebarItem.update({
+      where: { id },
+      data: parsed,
+    });
+  }
+
+  deleteSidebarItem(id: string) {
+    return this.prisma.sidebarItem.delete({ where: { id } });
+  }
+
+  private parseSidebarItemData(data: {
+    type?: string;
+    title?: string;
+    description?: string;
+    link?: string;
+    imageUrl?: string;
+    badge?: string;
+    ctaLabel?: string;
+    isActive?: boolean;
+    displayOrder?: number;
+  }) {
+    const allowedTypes = ['AD', 'FEATURED_COURSE', 'UPCOMING_EVENT', 'EDUCATIONAL_PRODUCT'];
+    const parsed: any = {};
+
+    if (data.type) {
+      const type = data.type.toUpperCase();
+      parsed.type = allowedTypes.includes(type) ? type : 'AD';
+    }
+    if (data.title !== undefined) parsed.title = data.title;
+    if (data.description !== undefined) parsed.description = data.description;
+    if (data.link !== undefined) parsed.link = data.link;
+    if (data.imageUrl !== undefined) parsed.imageUrl = data.imageUrl;
+    if (data.badge !== undefined) parsed.badge = data.badge;
+    if (data.ctaLabel !== undefined) parsed.ctaLabel = data.ctaLabel;
+    if (data.isActive !== undefined) parsed.isActive = data.isActive;
+    if (data.displayOrder !== undefined) parsed.displayOrder = data.displayOrder;
+
+    return parsed;
+  }
 }

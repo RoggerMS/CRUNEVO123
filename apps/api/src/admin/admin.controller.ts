@@ -72,4 +72,65 @@ export class AdminController {
   deleteContent(@Param('type') type: string, @Param('id') id: string) {
     return this.adminService.deleteContent(type, id);
   }
+
+  @Get('sidebar-items')
+  getSidebarItems() {
+    return this.adminService.getSidebarItems();
+  }
+
+  @Post('sidebar-items')
+  createSidebarItem(
+    @Body('type') type: string,
+    @Body('title') title: string,
+    @Body('description') description?: string,
+    @Body('link') link?: string,
+    @Body('imageUrl') imageUrl?: string,
+    @Body('badge') badge?: string,
+    @Body('ctaLabel') ctaLabel?: string,
+    @Body('isActive') isActive?: boolean,
+    @Body('displayOrder') displayOrder?: number,
+  ) {
+    return this.adminService.createSidebarItem({
+      type,
+      title,
+      description,
+      link,
+      imageUrl,
+      badge,
+      ctaLabel,
+      isActive,
+      displayOrder,
+    });
+  }
+
+  @Post('sidebar-items/:id')
+  updateSidebarItem(
+    @Param('id') id: string,
+    @Body('type') type: string,
+    @Body('title') title: string,
+    @Body('description') description?: string,
+    @Body('link') link?: string,
+    @Body('imageUrl') imageUrl?: string,
+    @Body('badge') badge?: string,
+    @Body('ctaLabel') ctaLabel?: string,
+    @Body('isActive') isActive?: boolean,
+    @Body('displayOrder') displayOrder?: number,
+  ) {
+    return this.adminService.updateSidebarItem(id, {
+      type,
+      title,
+      description,
+      link,
+      imageUrl,
+      badge,
+      ctaLabel,
+      isActive,
+      displayOrder,
+    });
+  }
+
+  @Delete('sidebar-items/:id')
+  deleteSidebarItem(@Param('id') id: string) {
+    return this.adminService.deleteSidebarItem(id);
+  }
 }
