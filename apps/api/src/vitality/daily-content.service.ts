@@ -22,7 +22,7 @@ export class DailyContentService {
       data: {
         title: "📢 Pregunta del Día",
         body: randomQ,
-        tags: "daily,community",
+        tags: ['daily', 'community'],
         authorId: adminUserId,
       },
     });
