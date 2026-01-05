@@ -1,0 +1,395 @@
+generator client {
+  provider = "prisma-client-js"
+}
+
+datasource db {
+  provider = "postgresql"
+  url      = env("DATABASE_URL")
+}
+
+enum Role {
+  STUDENT
+  TEACHER
+  ADMIN
+}
+
+enum TargetType {
+  POST
+  DOCUMENT
+  QUESTION
+  ANSWER
+}
+
+enum ReportStatus {
+  OPEN
+  RESOLVED
+}
+
+enum ClubRole {
+  OWNER
+  MOD
+  MEMBER
+}
+
+enum Visibility {
+  PUBLIC
+  PRIVATE
+  CLUB
+  ADMIN
+}
+
+enum ProductType {
+  DIGITAL_RESOURCE
+  COURSE
+  SERVICE
+}
+
+enum NotificationType {
+  SYSTEM
+  DAILY
+  LIKE
+  COMMENT
+  FOLLOW
+}
+
+enum DocumentStatus {
+  PENDING
+  VERIFIED
+  FLAGGED
+  REJECTED
+}
+
+model User {
+  id              String    @id @default(uuid())
+  email           String    @unique
+  username        String    @unique
+  bio             String?
+  passwordHash    String
+  role            Role      @default(STUDENT)
+  isBanned        Boolean   @default(false)
+  teacherVerified Boolean   @default(false)
+  points          Int       @default(0)
+  level           Int       @default(1)
+  createdAt       DateTime  @default(now())
+  updatedAt       DateTime  @updatedAt
+
+  documents       Document[]
+  questions       Question[]
+  answers         Answer[]
+  reports         Report[]
+  posts           Post[]
+  comments        Comment[]
+  likes           Like[]
+  votes           Vote[]
+  bookmarks       Bookmark[]
+  
+  products        Product[]
+  purchases       Purchase[]
+  events          Event[]
+  
+  followedBy      Follow[]  @relation("followedBy")
+  following       Follow[]  @relation("following")
+
+  clubsOwned      Club[]    @relation("ClubOwner")
+  clubMemberships ClubMember[]
+
+  conversations1  Conversation[] @relation("User1Conversations")
+  conversations2  Conversation[] @relation("User2Conversations")
+  messagesSent    Message[]
+
+  notifications   Notification[]
+}
+
+model Follow {
+  followerId  String
+  follower    User     @relation("following", fields: [followerId], references: [id])
+  followingId String
+  following   User     @relation("followedBy", fields: [followingId], references: [id])
+  createdAt   DateTime @default(now())
+
+  @@id([followerId, followingId])
+}
+
+model Club {
+  id          String   @id @default(uuid())
+  name        String
+  description String?
+  isPublic    Boolean  @default(true)
+  ownerId     String
+  owner       User     @relation("ClubOwner", fields: [ownerId], references: [id])
+  createdAt   DateTime @default(now())
+  updatedAt   DateTime @updatedAt
+
+  members     ClubMember[]
+  posts       Post[]
+  documents   Document[]
+  questions   Question[]
+}
+
+model ClubMember {
+  id        String   @id @default(uuid())
+  clubId    String
+  club      Club     @relation(fields: [clubId], references: [id])
+  userId    String
+  user      User     @relation(fields: [userId], references: [id])
+  role      ClubRole @default(MEMBER)
+  createdAt DateTime @default(now())
+
+  @@unique([clubId, userId])
+}
+
+enum ContentStatus {
+  ACTIVE
+  HIDDEN
+  DELETED
+}
+
+model Post {
+  id        String        @id @default(uuid())
+  authorId  String
+  author    User          @relation(fields: [authorId], references: [id])
+  content   String
+  imageUrl  String?
+  clubId    String?
+  club      Club?         @relation(fields: [clubId], references: [id])
+  status    ContentStatus @default(ACTIVE)
+  createdAt DateTime      @default(now())
+  
+  comments  Comment[]
+  likes     Like[]
+}
+
+model Document {
+  id             String         @id @default(uuid())
+  ownerId        String
+  owner          User           @relation(fields: [ownerId], references: [id])
+  title          String
+  description    String?
+  tags           String         // CSV
+  filePath       String
+  fileName       String?        // Original filename
+  mimeType       String
+  size           Int
+  visibility     Visibility     @default(PUBLIC)
+  downloadsCount Int            @default(0)
+  clubId         String?
+  club           Club?          @relation(fields: [clubId], references: [id])
+  
+  // New Fields for Iteration 2
+  thumbnailUrl   String?
+  version        Int            @default(1)
+  qualityStatus  DocumentStatus @default(PENDING)
+  status         ContentStatus  @default(ACTIVE)
+  parentId       String?
+  parent         Document?      @relation("DocumentHistory", fields: [parentId], references: [id])
+  versions       Document[]     @relation("DocumentHistory")
+
+  createdAt      DateTime       @default(now())
+
+  comments       Comment[]
+  likes          Like[]
+  bookmarks      Bookmark[]
+}
+
+model Question {
+  id               String        @id @default(uuid())
+  authorId         String
+  author           User          @relation(fields: [authorId], references: [id])
+  title            String
+  body             String
+  tags             String   // CSV
+  acceptedAnswerId String?
+  clubId           String?
+  club             Club?         @relation(fields: [clubId], references: [id])
+  status           ContentStatus @default(ACTIVE)
+  createdAt        DateTime      @default(now())
+
+  answers          Answer[]
+  comments         Comment[]
+  likes            Like[]
+  votes            Vote[]
+  bookmarks        Bookmark[]
+}
+
+model Answer {
+  id         String   @id @default(uuid())
+  questionId String
+  question   Question @relation(fields: [questionId], references: [id])
+  authorId   String
+  author     User     @relation(fields: [authorId], references: [id])
+  body       String
+  createdAt  DateTime @default(now())
+  
+  votes      Vote[]
+}
+
+model Comment {
+  id          String    @id @default(uuid())
+  authorId    String
+  author      User      @relation(fields: [authorId], references: [id])
+  body        String
+  createdAt   DateTime  @default(now())
+
+  postId      String?
+  post        Post?     @relation(fields: [postId], references: [id])
+  documentId  String?
+  document    Document? @relation(fields: [documentId], references: [id])
+  questionId  String?
+  question    Question? @relation(fields: [questionId], references: [id])
+}
+
+model Like {
+  id          String    @id @default(uuid())
+  authorId    String
+  author      User      @relation(fields: [authorId], references: [id])
+  createdAt   DateTime  @default(now())
+
+  postId      String?
+  post        Post?     @relation(fields: [postId], references: [id])
+  documentId  String?
+  document    Document? @relation(fields: [documentId], references: [id])
+  questionId  String?
+  question    Question? @relation(fields: [questionId], references: [id])
+}
+
+model Vote {
+  id          String    @id @default(uuid())
+  authorId    String
+  author      User      @relation(fields: [authorId], references: [id])
+  value       Int       // 1 or -1
+  createdAt   DateTime  @default(now())
+
+  questionId  String?
+  question    Question? @relation(fields: [questionId], references: [id])
+  answerId    String?
+  answer      Answer?   @relation(fields: [answerId], references: [id])
+
+  @@unique([authorId, questionId])
+  @@unique([authorId, answerId])
+}
+
+model Report {
+  id         String       @id @default(uuid())
+  reporterId String
+  reporter   User         @relation(fields: [reporterId], references: [id])
+  targetType TargetType
+  targetId   String
+  reason     String
+  status     ReportStatus @default(OPEN)
+  createdAt  DateTime     @default(now())
+}
+
+model Bookmark {
+  id        String   @id @default(uuid())
+  userId    String
+  user      User     @relation(fields: [userId], references: [id])
+  
+  documentId String?
+  document   Document? @relation(fields: [documentId], references: [id])
+  
+  questionId String?
+  question   Question? @relation(fields: [questionId], references: [id])
+
+  createdAt DateTime @default(now())
+
+  @@unique([userId, documentId])
+  @@unique([userId, questionId])
+}
+
+model Product {
+  id          String      @id @default(uuid())
+  title       String
+  description String?
+  price       Decimal     @db.Decimal(10, 2)
+  type        ProductType
+  ownerId     String
+  owner       User        @relation(fields: [ownerId], references: [id])
+  fileUrl     String?
+  isSystem    Boolean     @default(false)
+  createdAt   DateTime    @default(now())
+  updatedAt   DateTime    @updatedAt
+
+  purchases   Purchase[]
+}
+
+model Purchase {
+  id        String   @id @default(uuid())
+  buyerId   String
+  buyer     User     @relation(fields: [buyerId], references: [id])
+  productId String
+  product   Product  @relation(fields: [productId], references: [id])
+  amount    Decimal  @db.Decimal(10, 2)
+  createdAt DateTime @default(now())
+}
+
+model Event {
+  id          String   @id @default(uuid())
+  title       String
+  description String?
+  date        DateTime
+  location    String?
+  status      EventStatus @default(PENDING)
+  visibility  Visibility  @default(PUBLIC)
+  organizerId String
+  organizer   User     @relation(fields: [organizerId], references: [id])
+  createdAt   DateTime @default(now())
+}
+
+model Conversation {
+  id        String   @id @default(uuid())
+  user1Id   String
+  user1     User     @relation("User1Conversations", fields: [user1Id], references: [id])
+  user2Id   String
+  user2     User     @relation("User2Conversations", fields: [user2Id], references: [id])
+  updatedAt DateTime @updatedAt
+  
+  messages  Message[]
+
+  @@unique([user1Id, user2Id])
+}
+
+model Message {
+  id             String       @id @default(uuid())
+  conversationId String
+  conversation   Conversation @relation(fields: [conversationId], references: [id])
+  senderId       String
+  sender         User         @relation(fields: [senderId], references: [id])
+  content        String
+  isRead         Boolean      @default(false)
+  createdAt      DateTime     @default(now())
+}
+
+model Notification {
+  id        String           @id @default(uuid())
+  userId    String
+  user      User             @relation(fields: [userId], references: [id])
+  type      NotificationType
+  content   String
+  isRead    Boolean          @default(false)
+  link      String?
+  createdAt DateTime         @default(now())
+}
+
+enum EventStatus {
+  PENDING
+  APPROVED
+  REJECTED
+}
+
+// Stubs
+model Course {
+  id          String   @id @default(uuid())
+  title       String
+  description String?
+  createdAt   DateTime @default(now())
+  lessons     Lesson[]
+}
+
+model Lesson {
+  id        String   @id @default(uuid())
+  courseId  String
+  course    Course   @relation(fields: [courseId], references: [id])
+  title     String
+  content   String?
+  createdAt DateTime @default(now())
+}

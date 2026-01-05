@@ -1,0 +1,9 @@
+{
+  "dependencies": {
+    "axios": "^1.13.2",
+    "form-data": "^4.0.5"
+  },
+  "scripts": {
+    "verify:all": "node scripts/verify_all.js"
+  }
+}

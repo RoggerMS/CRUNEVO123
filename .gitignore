@@ -1,0 +1,52 @@
+# Node.js
+node_modules/
+dist/
+npm-debug.log*
+yarn-debug.log*
+yarn-error.log*
+.npm/
+
+# Environment variables
+.env
+.env.local
+.env.development.local
+.env.test.local
+.env.production.local
+
+# Build outputs
+build/
+out/
+.next/
+.cache/
+.turbo/
+
+# TypeScript
+tsconfig.tsbuildinfo
+*.tsbuildinfo
+
+# IDEs and editors
+.vscode/*
+!.vscode/extensions.json
+!.vscode/launch.json
+!.vscode/settings.json
+!.vscode/tasks.json
+.idea/
+*.swp
+*.swo
+.DS_Store
+
+# Prisma
+/prisma/migrations/
+/prisma/dev.db
+/prisma/dev.db-journal
+
+# Apps specific
+apps/api/dist/
+apps/web/dist/
+
+# Logs
+logs/
+*.log
+
+# Docker
+.dockerignore
