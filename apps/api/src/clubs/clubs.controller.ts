@@ -1,6 +1,7 @@
-import { Controller, Get, Post, Body, Param, UseGuards, Request } from '@nestjs/common';
+import { Controller, Get, Post, Body, Param, UseGuards, Request, Patch } from '@nestjs/common';
 import { ClubsService } from './clubs.service';
 import { CreateClubDto } from './dto/create-club.dto';
+import { UpdateClubDto } from './dto/update-club.dto';
 import { AuthGuard } from '@nestjs/passport';
 import { ApiBearerAuth, ApiTags } from '@nestjs/swagger';
 
@@ -55,5 +56,16 @@ export class ClubsController {
   @Get('user/:userId')
   findUserPublicClubs(@Param('userId') userId: string) {
     return this.clubsService.findUserClubs(userId);
+  }
+
+  @Patch(':id')
+  @UseGuards(AuthGuard('jwt'))
+  @ApiBearerAuth()
+  update(
+    @Request() req: any,
+    @Param('id') id: string,
+    @Body() updateClubDto: UpdateClubDto,
+  ) {
+    return this.clubsService.update(id, req.user.userId, updateClubDto);
   }
 }

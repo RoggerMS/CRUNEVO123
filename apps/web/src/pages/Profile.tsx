@@ -217,13 +217,19 @@ export default function Profile() {
       )}
 
       {tab === 'clubs' && (
-          <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fill, minmax(200px, 1fr))', gap: '1rem' }}>
-              {clubs.map((club: any) => (
-                  <Link to={`/clubs/${club.id}`} key={club.id} className="card" style={{ textDecoration: 'none', color: 'inherit' }}>
-                      <div style={{ fontWeight: 'bold', fontSize: '1.1rem' }}>{club.name}</div>
-                      <div style={{ fontSize: '0.9rem', color: '#666' }}>{club._count?.members || 0} members</div>
-                  </Link>
-              ))}
+          <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fill, minmax(220px, 1fr))', gap: '1rem' }}>
+              {clubs.map((club: any) => {
+                  const cover = club.coverImageUrl || '';
+                  return (
+                    <Link to={`/clubs/${club.id}`} key={club.id} className="card" style={{ textDecoration: 'none', color: 'inherit', padding: 0, overflow: 'hidden' }}>
+                        <div style={{ width: '100%', aspectRatio: '16 / 9', background: cover ? `url(${cover}) center/cover` : '#e5e7eb' }} />
+                        <div style={{ padding: '1rem' }}>
+                            <div style={{ fontWeight: 'bold', fontSize: '1.05rem' }}>{club.name}</div>
+                            <div style={{ fontSize: '0.9rem', color: '#666' }}>{club._count?.members || 0} miembros</div>
+                        </div>
+                    </Link>
+                  );
+              })}
               {clubs.length === 0 && <div>No clubs joined.</div>}
           </div>
       )}
