@@ -152,23 +152,7 @@ export default function Feed() {
 
   return (
     <div className="feed-container">
-      <div className="feed-header">
-        <div>
-          <p className="feed-eyebrow">Bienvenido</p>
-          <h1>Feed</h1>
-          <p className="feed-subtitle">Comparte novedades y descubre cursos, eventos y productos educativos.</p>
-        </div>
-        <div className="feed-summary">
-          <div>
-            <strong>{items.length}</strong>
-            <span>elementos</span>
-          </div>
-          <div>
-            <strong>{notifications.length}</strong>
-            <span>avisos</span>
-          </div>
-        </div>
-      </div>
+ 
 
       <div className="feed-grid">
         <div>
