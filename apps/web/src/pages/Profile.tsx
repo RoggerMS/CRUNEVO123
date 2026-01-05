@@ -94,8 +94,20 @@ export default function Profile() {
     <div className="container">
       <div className="card">
         <div style={{ display: 'flex', alignItems: 'center', gap: '20px' }}>
-          <div style={{ width: '100px', height: '100px', borderRadius: '50%', background: '#ccc', display: 'flex', alignItems: 'center', justifyContent: 'center', fontSize: '2rem' }}>
-            {user.username[0].toUpperCase()}
+          <div style={{ width: '100px', height: '100px', borderRadius: '50%', overflow: 'hidden', background: '#f3f4f6', display: 'flex', alignItems: 'center', justifyContent: 'center' }}>
+            {user.avatar ? (
+              <img
+                src={user.avatar}
+                alt={user.username}
+                style={{ width: '100%', height: '100%', objectFit: 'cover' }}
+              />
+            ) : (
+              <img
+                src={`https://ui-avatars.com/api/?name=${encodeURIComponent(user.username)}&background=random`}
+                alt={user.username}
+                style={{ width: '100%', height: '100%', objectFit: 'cover' }}
+              />
+            )}
           </div>
           <div style={{ flex: 1 }}>
             <h1>
