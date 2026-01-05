@@ -1,71 +1,57 @@
 # CRUNEVO - Plataforma Educativa (MVP)
 
-## Descripción
-CRUNEVO es una plataforma educativa con gestión de documentos y sistema de preguntas y respuestas (Q&A).
+MVP educativo/social en monorepo con **NestJS + Prisma + PostgreSQL** para el backend y **React + Vite + Tailwind CSS** para el frontend. Permite autenticación, gestión de documentos, preguntas/respuestas, feed social, reportes y módulos sociales adicionales (clubs, eventos, mensajes, store) con stubs de IA y cursos.
 
 ## Requisitos
-- Node.js (v18+)
+- Node.js 18+
 - Docker & Docker Compose
 
-## Ejecución Rápida (PowerShell Friendly)
+## Guía rápida (onboarding)
+### 1) Configurar entorno y base de datos
+```bash
+docker compose up -d                  # PostgreSQL + Adminer
+cp .env.example .env                  # Ajusta credenciales y URLs si es necesario
+```
 
-Sigue estos pasos en orden. Usa terminales separadas para API y Web.
+### 2) Backend (API)
+```bash
+cd apps/api
+npm install
+npx prisma migrate dev --name init
+npx prisma db seed
+npm run start:dev                     # API en http://localhost:3000
+```
 
-1. **Configuración Inicial (Solo la primera vez)**
-   ```powershell
-   # Levantar base de datos
-   docker compose up -d
-   
-   # Instalar dependencias
-   cd apps/api; npm install
-   cd ../web; npm install
-   
-   # Configurar DB y usuario Admin
-   cd apps/api
-   npx prisma migrate dev --name init
-   npx prisma db seed
-   ```
+### 3) Frontend (Web)
+```bash
+cd ../web
+npm install
+npm run dev                           # Web en http://localhost:5173
+```
 
-2. **Iniciar Backend (API)**
-   ```powershell
-   cd apps/api
-   npm run start:dev
-   ```
-   *API disponible en http://localhost:3000*
+### 4) Verificación rápida del MVP (opcional)
+Desde `apps/api` con la API corriendo:
+```bash
+npm run verify:mvp
+```
+Ejecuta flujo de login, subida de documento, feed y Q&A.
 
-3. **Iniciar Frontend (Web)**
-   ```powershell
-   cd apps/web
-   npm run dev
-   ```
-   *Web disponible en http://localhost:5173*
+## Credenciales por defecto
+- **DB (host):** localhost:5433 / user: postgres / pass: CrunevoSecurePwd2024! / db: crunevo
+- **Adminer:** http://localhost:8082 (server: postgres, user: postgres, pass: CrunevoSecurePwd2024!)
+- **Usuario Admin:** admin@crunevo.local / Admin123!
 
-4. **Verificar MVP (Script)**
-   Desde `apps/api` (con el servidor corriendo):
-   ```powershell
-   npm run verify:mvp
-   ```
-   *Esto probará Login, Upload, Feed y Q&A automáticamente.*
-
-## Credenciales
-
-### Base de Datos
-- **Host:** localhost:5433
-- **User:** postgres
-- **Pass:** CrunevoSecurePwd2024!
-- **DB:** crunevo
-
-### Adminer (Gestor DB)
-- **URL:** http://localhost:8082
-- **Server:** postgres (interno)
-- **User:** postgres
-- **Pass:** CrunevoSecurePwd2024!
-
-### Usuario Admin
-- **Email:** admin@crunevo.local
-- **Password:** Admin123!
+## Panorama funcional
+- **Autenticación y roles:** crea cuenta o usa el admin. Tras login obtienes token JWT.
+- **Documentos:** sube archivos desde “Upload” (`/documents/new`); se listan en feed y tienen detalle descargable.
+- **Preguntas y respuestas (Aula):** crea preguntas en `/aula/new`, responde desde el detalle (`/aula/:id`) y marca respuesta aceptada.
+- **Feed:** vista agregada de actividad (documentos, preguntas recientes).
+- **Reportes y admin:** reporta contenido y revísalo/verifícalo en `/admin` (solo roles elevados).
+- **Social extra:** clubs (`/clubs`), eventos (`/events`), mensajes (`/messages`), store (`/store`) para catálogo y compras, likes/bookmarks en contenido.
+- **Stubs:** módulos de IA y Cursos expuestos como placeholders.
 
 ## Estructura
-- `/apps/api`: Backend NestJS + Prisma.
-- `/apps/web`: Frontend React + Vite (Sin Tailwind, CSS puro).
-- `/scripts`: Scripts de utilidad y verificación.
+- `/apps/api`: Backend NestJS + Prisma (uploads locales, JWT, módulos sociales y académicos).
+- `/apps/web`: Frontend React + Vite + Tailwind CSS, SPA protegida por JWT.
+- `/docs`: PRD, arquitectura, roadmap y changelog.
+- `/scripts`: utilidades y verificación.
