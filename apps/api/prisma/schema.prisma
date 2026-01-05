@@ -204,12 +204,17 @@ model Question {
   author           User          @relation(fields: [authorId], references: [id])
   title            String
   body             String
-  tags             String   // CSV
+  subject          String?
+  tags             String[]
+  attachments      String[]      @default([])
   acceptedAnswerId String?
   clubId           String?
   club             Club?         @relation(fields: [clubId], references: [id])
   status           ContentStatus @default(ACTIVE)
+  viewCount        Int           @default(0)
   createdAt        DateTime      @default(now())
+  updatedAt        DateTime      @updatedAt
+  lastActivityAt   DateTime      @default(now())
 
   answers          Answer[]
   comments         Comment[]
@@ -225,9 +230,13 @@ model Answer {
   authorId   String
   author     User     @relation(fields: [authorId], references: [id])
   body       String
+  attachments String[]      @default([])
+  status     ContentStatus @default(ACTIVE)
   createdAt  DateTime @default(now())
+  updatedAt  DateTime @updatedAt
   
   votes      Vote[]
+  comments   Comment[]
 }
 
 model Comment {
@@ -243,6 +252,8 @@ model Comment {
   document    Document? @relation(fields: [documentId], references: [id])
   questionId  String?
   question    Question? @relation(fields: [questionId], references: [id])
+  answerId    String?
+  answer      Answer?   @relation(fields: [answerId], references: [id])
 }
 
 model Like {

@@ -28,10 +28,13 @@ export class FeedService {
       }),
       this.prisma.question.findMany({
         take: limit,
-        orderBy: { createdAt: 'desc' },
+        orderBy: { lastActivityAt: 'desc' },
         include: {
           author: { select: { id: true, username: true } },
           _count: { select: { comments: true, likes: true, answers: true, votes: true } },
+        },
+        where: {
+          status: 'ACTIVE',
         },
       }),
     ]);

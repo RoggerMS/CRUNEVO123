@@ -78,7 +78,7 @@ export class UsersService {
         include: { owner: { select: { id: true, username: true } } },
       }),
       this.prisma.question.findMany({
-        where: { authorId: id },
+        where: { authorId: id, status: 'ACTIVE' },
         take: limit,
         orderBy: { createdAt: 'desc' },
         include: { author: { select: { id: true, username: true } } },

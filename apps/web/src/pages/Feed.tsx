@@ -341,7 +341,11 @@ export default function Feed() {
                     </div>
                   )}
 
-                  {item.tags && <div style={{ fontSize: '0.9rem', color: '#007bff' }}>Tags: {item.tags}</div>}
+                  {item.tags && (
+                    <div style={{ fontSize: '0.9rem', color: '#007bff' }}>
+                      Tags: {Array.isArray(item.tags) ? item.tags.join(', ') : item.tags}
+                    </div>
+                  )}
 
                   <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginTop: '0.75rem' }}>
                     <div style={{ display: 'flex', gap: '16px', alignItems: 'center' }}>
