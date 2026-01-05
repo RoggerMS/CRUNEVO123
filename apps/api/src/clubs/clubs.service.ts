@@ -1,6 +1,7 @@
 import { Injectable, NotFoundException, ForbiddenException } from '@nestjs/common';
 import { PrismaService } from '../prisma/prisma.service';
 import { CreateClubDto } from './dto/create-club.dto';
+import { UpdateClubDto } from './dto/update-club.dto';
 import { ClubRole } from '@prisma/client';
 
 @Injectable()
@@ -33,7 +34,7 @@ export class ClubsService {
     // Get clubs where user is member or owner
     const memberships = await this.prisma.clubMember.findMany({
         where: { userId },
-        include: { club: { include: { _count: { select: { members: true } } } } }
+        include: { club: { include: { _count: { select: { members: true } }, owner: { select: { id: true } } } } }
     });
     return memberships.map(m => m.club);
   }
@@ -52,7 +53,7 @@ export class ClubsService {
       where: { id },
       include: {
         _count: { select: { members: true } },
-        owner: { select: { username: true } },
+        owner: { select: { id: true, username: true } },
       },
     });
     if (!club) throw new NotFoundException('Club not found');
@@ -89,6 +90,21 @@ export class ClubsService {
 
     return this.prisma.clubMember.delete({
       where: { clubId_userId: { clubId, userId } },
+    });
+  }
+
+  async update(clubId: string, userId: string, data: UpdateClubDto) {
+    const club = await this.prisma.club.findUnique({ where: { id: clubId } });
+    if (!club) throw new NotFoundException('Club not found');
+    if (club.ownerId !== userId) throw new ForbiddenException('Only owners can edit clubs');
+
+    return this.prisma.club.update({
+      where: { id: clubId },
+      data,
+      include: {
+        _count: { select: { members: true } },
+        owner: { select: { id: true, username: true } },
+      },
     });
   }
 

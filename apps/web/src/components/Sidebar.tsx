@@ -84,7 +84,24 @@ export default function Sidebar() {
                         onMouseEnter={(e) => e.currentTarget.style.backgroundColor = '#f3f4f6'}
                         onMouseLeave={(e) => e.currentTarget.style.backgroundColor = 'transparent'}
                     >
-                        <div style={{ width: '24px', height: '24px', background: '#e5e7eb', borderRadius: '4px' }}></div>
+                        <div 
+                            style={{ 
+                                width: '28px', 
+                                height: '28px', 
+                                borderRadius: '6px', 
+                                background: club.coverImageUrl ? `url(${club.coverImageUrl}) center/cover` : '#e5e7eb', 
+                                flexShrink: 0, 
+                                display: 'flex', 
+                                alignItems: 'center', 
+                                justifyContent: 'center',
+                                color: '#6b7280',
+                                fontWeight: 700,
+                                fontSize: '0.75rem',
+                                textTransform: 'uppercase'
+                            }}
+                        >
+                            {!club.coverImageUrl && club.name?.[0]}
+                        </div>
                         <span style={{ whiteSpace: 'nowrap', overflow: 'hidden', textOverflow: 'ellipsis', color: '#374151' }}>{club.name}</span>
                     </Link>
                 ))}

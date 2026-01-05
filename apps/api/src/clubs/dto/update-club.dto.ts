@@ -1,11 +1,12 @@
 import { IsBoolean, IsNotEmpty, IsOptional, IsString } from 'class-validator';
-import { ApiProperty, ApiPropertyOptional } from '@nestjs/swagger';
+import { ApiPropertyOptional } from '@nestjs/swagger';
 
-export class CreateClubDto {
-  @ApiProperty()
+export class UpdateClubDto {
+  @ApiPropertyOptional()
+  @IsOptional()
   @IsString()
   @IsNotEmpty()
-  name: string;
+  name?: string;
 
   @ApiPropertyOptional()
   @IsOptional()
