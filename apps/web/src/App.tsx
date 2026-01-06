@@ -1,5 +1,6 @@
-import React, { useEffect, useState } from 'react';
+import React, { useEffect, useMemo, useState } from 'react';
 import { BrowserRouter, Routes, Route, Navigate, Link, useNavigate, useLocation } from 'react-router-dom';
+import { Bell, CalendarDays, FileText, GraduationCap, Home as HomeIcon, MessageCircle, Receipt, Shield, Store as StoreIcon, Users, BookOpen } from 'lucide-react';
 import { api } from './api/client';
 import Login from './pages/Login';
 import Register from './pages/Register';
@@ -24,6 +25,8 @@ import Messages from './pages/Messages';
 import Notifications from './pages/Notifications';
 
 import Events from './pages/Events';
+import AppMenu, { type AppMenuSection } from './components/AppMenu';
+import Sidebar from './components/Sidebar';
 
 function PrivateRoute({ children }: { children: React.ReactNode }) {
   const token = localStorage.getItem('token');
@@ -69,18 +72,63 @@ function Home() {
     );
 }
 
-import Sidebar from './components/Sidebar';
-
 function Layout({ children }: { children: React.ReactNode }) {
   const navigate = useNavigate();
   const location = useLocation();
   const [currentUser, setCurrentUser] = useState<any>(null);
+
   useEffect(() => {
     const token = localStorage.getItem('token');
     if (token) {
         api.get('/users/me').then(res => setCurrentUser(res.data)).catch(() => {});
     }
   }, []);
+
+  const menuSections = useMemo<AppMenuSection[]>(() => {
+    const sections: AppMenuSection[] = [
+      {
+        title: 'Social',
+        items: [
+          { label: 'Feed', description: 'Explora las novedades de tu red.', to: '/feed', icon: <HomeIcon size={18} /> },
+          { label: 'Clubes', description: 'Conecta con comunidades y clubes.', to: '/clubs', icon: <Users size={18} /> },
+          { label: 'Eventos', description: 'Consulta y organiza actividades.', to: '/events', icon: <CalendarDays size={18} /> },
+        ],
+      },
+      {
+        title: 'Aprendizaje',
+        items: [
+          { label: 'Aula', description: 'Haz preguntas y comparte conocimiento.', to: '/aula', icon: <GraduationCap size={18} /> },
+          { label: 'Apuntes', description: 'Consulta resúmenes y materiales.', to: '/apuntes', icon: <BookOpen size={18} /> },
+          { label: 'Documentos', description: 'Crea o revisa documentos compartidos.', to: '/documents/new', icon: <FileText size={18} /> },
+        ],
+      },
+      {
+        title: 'Comunicación',
+        items: [
+          { label: 'Mensajes', description: 'Chatea con otros miembros.', to: '/messages', icon: <MessageCircle size={18} /> },
+          { label: 'Notificaciones', description: 'Revisa tus alertas recientes.', to: '/notifications', icon: <Bell size={18} /> },
+        ],
+      },
+      {
+        title: 'Comercio',
+        items: [
+          { label: 'Marketplace', description: 'Compra y vende recursos académicos.', to: '/store', icon: <StoreIcon size={18} /> },
+          { label: 'Mis compras', description: 'Revisa el historial de pedidos.', to: '/store/orders/mine', icon: <Receipt size={18} /> },
+        ],
+      },
+    ];
+
+    if (currentUser?.role === 'ADMIN') {
+      sections.push({
+        title: 'Administración',
+        items: [
+          { label: 'Panel', description: 'Gestiona usuarios y contenido.', to: '/admin', icon: <Shield size={18} /> },
+        ],
+      });
+    }
+
+    return sections;
+  }, [currentUser]);
 
   const handleLogout = () => {
     localStorage.removeItem('token');
@@ -93,28 +141,30 @@ function Layout({ children }: { children: React.ReactNode }) {
   }
 
   return (
-    <div style={{ display: 'flex', background: '#f8f9fa', minHeight: '100vh' }}>
-      {/* Sidebar for Desktop */}
-      <div className="sidebar-container" style={{ display: 'none' }}> 
-         {/* We will use media query in CSS or JS for responsive, for now assume desktop > 768px */}
-      </div>
-      <div style={{ display: 'block' }}> {/* Actually let's just force Sidebar for now since we want it */}
-          <Sidebar />
+    <div className="app-shell">
+      <div className="app-sidebar-wrapper">
+        <Sidebar />
       </div>
 
-      <div style={{ flex: 1, padding: '2rem', maxWidth: '1200px', margin: '0 auto', width: '100%' }}>
-          {/* Top Bar (Search, Notifs, Profile) */}
-          <header style={{ display: 'flex', justifyContent: 'flex-end', alignItems: 'center', marginBottom: '2rem', gap: '20px' }}>
-             <div style={{ marginRight: 'auto', fontWeight: 'bold' }}>
-                 {/* Page Title or Breadcrumb could go here */}
-             </div>
+      <div className="app-main">
+          <header className="topbar">
+            <div style={{ marginRight: 'auto', fontWeight: 'bold' }}>
+                {/* Page Title or Breadcrumb could go here */}
+            </div>
 
-             <Link to="/notifications" style={{ position: 'relative', textDecoration: 'none', fontSize: '1.2rem' }}>
-                🔔
-             </Link>
+            <div className="topbar-actions">
+              <AppMenu sections={menuSections} />
 
-             {currentUser ? (
-                <div style={{ display: 'flex', gap: '15px', alignItems: 'center' }}>
+              <Link to="/messages" className="topbar-icon-button" aria-label="Ir a mensajes">
+                <MessageCircle size={18} />
+              </Link>
+
+              <Link to="/notifications" className="topbar-icon-button" aria-label="Ir a notificaciones">
+                <Bell size={18} />
+              </Link>
+
+              {currentUser ? (
+                <div className="topbar-profile">
                     <Link 
                         to={`/users/${currentUser.id}/profile`}
                         style={{
@@ -128,15 +178,16 @@ function Layout({ children }: { children: React.ReactNode }) {
                         <img 
                             src={`https://ui-avatars.com/api/?name=${currentUser.username}&background=random`} 
                             alt={currentUser.username}
-                            style={{ width: '36px', height: '36px', borderRadius: '50%' }}
+                            className="topbar-avatar"
                         />
                         <span style={{ fontWeight: 'bold', fontSize: '0.9rem' }}>@{currentUser.username}</span>
                     </Link>
                     <button onClick={handleLogout} className="btn btn-sm btn-secondary">Logout</button>
                 </div>
-             ) : (
-                 <span>Loading...</span>
-             )}
+              ) : (
+                  <span>Loading...</span>
+              )}
+            </div>
           </header>
 
           {children}
