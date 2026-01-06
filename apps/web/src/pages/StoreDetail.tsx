@@ -1,4 +1,4 @@
-import { useEffect, useState } from 'react';
+import { useEffect, useState, useCallback } from 'react';
 import { useParams, useNavigate } from 'react-router-dom';
 import { api } from '../api/client';
 
@@ -9,11 +9,7 @@ export default function StoreDetail() {
   const [loading, setLoading] = useState(true);
   const [buying, setBuying] = useState(false);
 
-  useEffect(() => {
-    if (id) fetchProduct();
-  }, [id]);
-
-  const fetchProduct = () => {
+  const fetchProduct = useCallback(() => {
     api.get(`/store/products/${id}`)
       .then(res => {
         setProduct(res.data);
@@ -23,7 +19,11 @@ export default function StoreDetail() {
         console.error(err);
         setLoading(false);
       });
-  };
+  }, [id]);
+
+  useEffect(() => {
+    if (id) fetchProduct();
+  }, [id, fetchProduct]);
 
   const handleBuy = () => {
     if (!confirm(`Confirm purchase for S/ ${product.price}?`)) return;

@@ -1,4 +1,4 @@
-import { useEffect, useState, useRef } from 'react';
+import { useEffect, useState, useRef, useCallback } from 'react';
 import { api } from '../api/client';
 import { Link } from 'react-router-dom';
 import { formatApiErrorMessage } from '../api/error';
@@ -42,7 +42,7 @@ export default function Feed() {
     alert(`Preferencia global actualizada: Vistas ${newValue ? 'públicas' : 'privadas'} por defecto.`);
   };
 
-  const loadFeed = () => {
+  const loadFeed = useCallback(() => {
     setLoading(true);
     setError('');
     Promise.all([
@@ -52,19 +52,22 @@ export default function Feed() {
       .then((res) => {
         const data = res[0].data;
         setItems(data);
-        const v: Record<string, number> = {};
         
         // Mock views count since backend doesn't provide it yet
         // TODO: Replace with real view count from API
-        data.forEach((it: any) => { 
-            if (!views[it.id]) {
-                v[it.id] = Math.floor(Math.random() * 50) + 1; 
-            } else {
-                v[it.id] = views[it.id];
-            }
+        setViews(prevViews => {
+            const newViews = { ...prevViews };
+            const v: Record<string, number> = {};
+            data.forEach((it: any) => { 
+                if (!newViews[it.id]) {
+                    v[it.id] = Math.floor(Math.random() * 50) + 1; 
+                } else {
+                    v[it.id] = newViews[it.id];
+                }
+            });
+            return { ...newViews, ...v };
         });
         
-        setViews(prev => ({ ...prev, ...v }));
         setSidebarItems(Array.isArray(res[1].data) ? res[1].data : []);
         setLoading(false);
       })
@@ -77,14 +80,14 @@ export default function Feed() {
         }
         setLoading(false);
       });
-  };
+  }, []); // No dependencies needed as setters are stable
 
   useEffect(() => { 
     loadFeed(); 
     api.get('/users/me').then(res => setCurrentUser(res.data)).catch(() => {});
     api.get('/clubs/my-clubs').then(res => setClubs(res.data)).catch(() => {});
     api.get('/vitality/notifications').then(res => setNotifications(res.data)).catch(() => {});
-  }, []);
+  }, [loadFeed]);
 
   const handleFileChange = (e: React.ChangeEvent<HTMLInputElement>) => {
     if (e.target.files && e.target.files[0]) {

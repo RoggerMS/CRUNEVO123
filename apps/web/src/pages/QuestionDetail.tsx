@@ -1,4 +1,4 @@
-import { useEffect, useState } from 'react';
+import { useEffect, useState, useCallback } from 'react';
 import { Link, useNavigate, useParams, useSearchParams } from 'react-router-dom';
 import { api } from '../api/client';
 
@@ -14,12 +14,7 @@ export default function QuestionDetail() {
   const [searchParams, setSearchParams] = useSearchParams();
   const navigate = useNavigate();
 
-  useEffect(() => {
-    api.get('/users/me').then(res => setCurrentUser(res.data)).catch(() => {});
-    fetchQuestion();
-  }, [id, answersSort]);
-
-  const fetchQuestion = () => {
+  const fetchQuestion = useCallback(() => {
     const params = answersSort ? `?answersSort=${answersSort}` : '';
     api.get(`/aula/questions/${id}${params}`)
       .then(res => {
@@ -31,7 +26,12 @@ export default function QuestionDetail() {
         setError('Failed to load question');
         setLoading(false);
       });
-  };
+  }, [id, answersSort]);
+
+  useEffect(() => {
+    api.get('/users/me').then(res => setCurrentUser(res.data)).catch(() => {});
+    fetchQuestion();
+  }, [id, answersSort, fetchQuestion]);
 
   const handleAnswer = async (e: React.FormEvent) => {
     e.preventDefault();
@@ -40,7 +40,7 @@ export default function QuestionDetail() {
       setAnswerBody('');
       setAnswerAttachment('');
       fetchQuestion();
-    } catch (error) {
+    } catch {
       alert('Failed to answer');
     }
   };
@@ -49,7 +49,7 @@ export default function QuestionDetail() {
     try {
       await api.post(`/aula/questions/${id}/accept/${answerId}`);
       fetchQuestion();
-    } catch (error) {
+    } catch {
       alert('Failed to accept');
     }
   };
@@ -58,7 +58,7 @@ export default function QuestionDetail() {
     try {
       await api.post('/aula/vote', { targetType, targetId, value });
       fetchQuestion();
-    } catch (error) {
+    } catch {
       alert('Failed to vote');
     }
   };
@@ -69,7 +69,7 @@ export default function QuestionDetail() {
     try {
       await api.post('/reports', { targetType, targetId, reason });
       alert('Reporte enviado a moderación');
-    } catch (error) {
+    } catch {
       alert('No se pudo enviar el reporte');
     }
   };
@@ -82,7 +82,7 @@ export default function QuestionDetail() {
         : `/answers/${targetId}/status`;
       await api.patch(endpoint, { status });
       fetchQuestion();
-    } catch (error) {
+    } catch {
       alert('Error actualizando estado');
     }
   };

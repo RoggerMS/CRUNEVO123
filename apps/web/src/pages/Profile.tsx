@@ -85,7 +85,7 @@ export default function Profile() {
         setIsEditing(false);
         // Reload
         window.location.reload();
-    } catch (e) {
+    } catch {
         alert('Failed to update profile');
     }
   };

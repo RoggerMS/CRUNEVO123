@@ -1,4 +1,4 @@
-import { useEffect, useState } from 'react';
+import { useEffect, useState, useCallback } from 'react';
 import { api } from '../api/client';
 import { Trash2, UserCheck, Ban, Edit, X, Eye, EyeOff, RotateCcw } from 'lucide-react';
 import { ErrorBoundary } from '../components/ErrorBoundary';
@@ -32,29 +32,57 @@ function AdminPanelContent() {
   const [editingUser, setEditingUser] = useState<any>(null);
   const [editForm, setEditForm] = useState({ points: 0, level: 1 });
 
-  useEffect(() => {
-    fetchData();
-  }, [activeTab]);
-
-  useEffect(() => {
-    if (activeTab === 'users') {
-      const delayDebounceFn = setTimeout(() => {
-        fetchUsers();
-      }, 500);
-      return () => clearTimeout(delayDebounceFn);
-    }
-  }, [userSearch]);
-
-  useEffect(() => {
-      if (activeTab === 'content') {
-          const delayDebounceFn = setTimeout(() => {
-              fetchContent();
-          }, 500);
-          return () => clearTimeout(delayDebounceFn);
-      }
+  const fetchContent = useCallback(() => {
+      setLoading(true);
+      api.get(`/admin/content/${contentType}`, {
+          params: {
+              status: contentStatus,
+              q: contentSearch,
+              limit: 50
+          }
+      })
+      .then(res => {
+          // Handle both { items: [], total: 0 } and [] formats
+          const list = res.data.items || (Array.isArray(res.data) ? res.data : []);
+      setContentList(list);
+      setLoading(false);
+  })
+      .catch(err => {
+          console.error("Fetch Content Error", err);
+          setContentList([]);
+          setError('Failed to load content');
+          setLoading(false);
+      });
   }, [contentType, contentStatus, contentSearch]);
 
-  const fetchData = () => {
+  const fetchSidebarItems = useCallback(() => {
+      api.get('/admin/sidebar-items')
+        .then(res => {
+            setSidebarItems(Array.isArray(res.data) ? res.data : []);
+            setLoading(false);
+        })
+        .catch(err => {
+            console.error("Fetch Sidebar Error", err);
+            setSidebarItems([]);
+            setError('Failed to load sidebar items');
+            setLoading(false);
+        });
+  }, []);
+
+  const fetchUsers = useCallback(() => {
+    api.get(`/admin/users?search=${userSearch}`)
+      .then(res => {
+        setUsers(Array.isArray(res.data) ? res.data : []);
+        setLoading(false);
+      })
+      .catch(err => {
+        console.error("Fetch Users Error", err);
+        setError('Access Denied');
+        setLoading(false);
+      });
+  }, [userSearch]);
+
+  const fetchData = useCallback(() => {
     setLoading(true);
     setError('');
     
@@ -76,57 +104,29 @@ function AdminPanelContent() {
     } else {
       fetchUsers();
     }
-  };
+  }, [activeTab, fetchContent, fetchSidebarItems, fetchUsers]);
 
-  const fetchContent = () => {
-      setLoading(true);
-      api.get(`/admin/content/${contentType}`, {
-          params: {
-              status: contentStatus,
-              q: contentSearch,
-              limit: 50
-          }
-      })
-      .then(res => {
-          // Handle both { items: [], total: 0 } and [] formats
-          const list = res.data.items || (Array.isArray(res.data) ? res.data : []);
-      setContentList(list);
-      setLoading(false);
-  })
-      .catch(err => {
-          console.error("Fetch Content Error", err);
-          setContentList([]);
-          setError('Failed to load content');
-          setLoading(false);
-      });
-  };
+  useEffect(() => {
+    fetchData();
+  }, [fetchData]);
 
-  const fetchSidebarItems = () => {
-      api.get('/admin/sidebar-items')
-        .then(res => {
-            setSidebarItems(Array.isArray(res.data) ? res.data : []);
-            setLoading(false);
-        })
-        .catch(err => {
-            console.error("Fetch Sidebar Error", err);
-            setSidebarItems([]);
-            setError('Failed to load sidebar items');
-            setLoading(false);
-        });
-  };
+  useEffect(() => {
+    if (activeTab === 'users') {
+      const delayDebounceFn = setTimeout(() => {
+        fetchUsers();
+      }, 500);
+      return () => clearTimeout(delayDebounceFn);
+    }
+  }, [activeTab, userSearch, fetchUsers]);
 
-  const fetchUsers = () => {
-    api.get(`/admin/users?search=${userSearch}`)
-      .then(res => {
-        setUsers(Array.isArray(res.data) ? res.data : []);
-        setLoading(false);
-      })
-      .catch(err => {
-        console.error("Fetch Users Error", err);
-        setError('Access Denied');
-        setLoading(false);
-      });
-  };
+  useEffect(() => {
+      if (activeTab === 'content') {
+          const delayDebounceFn = setTimeout(() => {
+              fetchContent();
+          }, 500);
+          return () => clearTimeout(delayDebounceFn);
+      }
+  }, [activeTab, contentType, contentStatus, contentSearch, fetchContent]);
 
   const handleDeleteContent = async (type: string, id: string) => {
     if (!confirm('Are you sure you want to permanently delete this content?')) return;
@@ -139,7 +139,7 @@ function AdminPanelContent() {
           setContentList(contentList.filter(i => i.id !== id));
       }
       alert('Content deleted');
-    } catch (error) {
+    } catch {
       alert('Failed to delete content');
     }
   };
@@ -150,7 +150,7 @@ function AdminPanelContent() {
           // Optimistic
           setContentList(contentList.filter(i => i.id !== id));
           alert(`Content ${newStatus.toLowerCase()}`);
-      } catch (error) {
+      } catch {
           alert('Failed to update status');
       }
   };
@@ -160,7 +160,7 @@ function AdminPanelContent() {
     try {
       await api.post(`/admin/users/${user.id}/ban`, { isBanned: !user.isBanned });
       fetchUsers();
-    } catch (error) {
+    } catch {
       alert('Failed to update ban status');
     }
   };
@@ -170,7 +170,7 @@ function AdminPanelContent() {
       await api.post(`/admin/users/${userId}/verify-teacher`);
       fetchUsers();
       alert('Teacher Verified');
-    } catch (error) {
+    } catch {
       alert('Failed to verify teacher');
     }
   };
@@ -186,7 +186,7 @@ function AdminPanelContent() {
       await api.post(`/admin/users/${editingUser.id}/stats`, editForm);
       setEditingUser(null);
       fetchUsers();
-    } catch (error) {
+    } catch {
       alert('Failed to update stats');
     }
   };
@@ -212,7 +212,7 @@ function AdminPanelContent() {
               displayOrder: 0,
           });
           fetchSidebarItems();
-      } catch (error) {
+      } catch {
           alert('No se pudo guardar el elemento');
       }
   };
@@ -226,7 +226,7 @@ function AdminPanelContent() {
       try {
           await api.delete(`/admin/sidebar-items/${id}`);
           fetchSidebarItems();
-      } catch (error) {
+      } catch {
           alert('No se pudo eliminar el elemento');
       }
   };

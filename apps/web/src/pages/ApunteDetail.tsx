@@ -1,4 +1,4 @@
-import { useEffect, useState } from 'react';
+import { useEffect, useState, useCallback } from 'react';
 import { useParams } from 'react-router-dom';
 import { api } from '../api/client';
 
@@ -8,11 +8,7 @@ export default function ApunteDetail() {
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState('');
 
-  useEffect(() => {
-    if (id) fetchDoc();
-  }, [id]);
-
-  const fetchDoc = () => {
+  const fetchDoc = useCallback(() => {
     api.get(`/apuntes/${id}`)
       .then(res => {
         setDoc(res.data);
@@ -23,7 +19,11 @@ export default function ApunteDetail() {
         setError('Failed to load document');
         setLoading(false);
       });
-  };
+  }, [id]);
+
+  useEffect(() => {
+    if (id) fetchDoc();
+  }, [id, fetchDoc]);
 
   const handleDownload = () => {
     if (!id) return;

@@ -1,4 +1,4 @@
-import { useEffect, useState } from 'react';
+import { useEffect, useState, useCallback } from 'react';
 import { api } from '../api/client';
 import { Calendar, dateFnsLocalizer, Views } from 'react-big-calendar';
 import type { View } from 'react-big-calendar';
@@ -34,11 +34,7 @@ export default function Events() {
   const [location, setLocation] = useState('');
   const [visibility, setVisibility] = useState('PUBLIC');
 
-  useEffect(() => {
-    fetchUserAndEvents();
-  }, []);
-
-  const fetchUserAndEvents = async () => {
+  const fetchUserAndEvents = useCallback(async () => {
     setLoading(true);
     try {
         const userRes = await api.get('/users/me');
@@ -76,7 +72,11 @@ export default function Events() {
     } finally {
         setLoading(false);
     }
-  };
+  }, []);
+
+  useEffect(() => {
+    fetchUserAndEvents();
+  }, [fetchUserAndEvents]);
 
   const handleCreate = async (e: React.FormEvent) => {
     e.preventDefault();
@@ -92,7 +92,7 @@ export default function Events() {
         setTitle(''); setDesc(''); setDate(''); setLocation('');
         alert(user?.role === 'ADMIN' ? 'Event created!' : 'Request sent successfully!');
         fetchUserAndEvents();
-    } catch (e) {
+    } catch {
         alert('Failed to create event');
     }
   };
@@ -101,7 +101,7 @@ export default function Events() {
       try {
           await api.patch(`/events/${id}/status`, { status });
           fetchUserAndEvents();
-      } catch (e) {
+      } catch {
           alert('Error updating status');
       }
   };

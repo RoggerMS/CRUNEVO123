@@ -1,4 +1,4 @@
-import { useEffect, useState } from 'react';
+import { useEffect, useState, useCallback } from 'react';
 import { api } from '../api/client';
 import { Link, useSearchParams } from 'react-router-dom';
 
@@ -13,11 +13,7 @@ export default function Apuntes() {
   const sort = searchParams.get('sort') || 'newest';
   const mine = searchParams.get('mine') === 'true';
 
-  useEffect(() => {
-    fetchDocs();
-  }, [q, type, sort, mine]);
-
-  const fetchDocs = () => {
+  const fetchDocs = useCallback(() => {
     setLoading(true);
     const params = new URLSearchParams();
     if (q) params.append('q', q);
@@ -34,7 +30,11 @@ export default function Apuntes() {
         console.error(err);
         setLoading(false);
       });
-  };
+  }, [q, type, sort, mine]);
+
+  useEffect(() => {
+    fetchDocs();
+  }, [fetchDocs]);
 
   const updateFilter = (key: string, value: string) => {
     const newParams = new URLSearchParams(searchParams);

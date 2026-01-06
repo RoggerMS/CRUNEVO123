@@ -1,4 +1,4 @@
-import { useEffect, useState } from 'react';
+import { useEffect, useState, useCallback } from 'react';
 import { api } from '../api/client';
 import { Link, useSearchParams } from 'react-router-dom';
 
@@ -10,11 +10,7 @@ export default function Store() {
   const q = searchParams.get('q') || '';
   const type = searchParams.get('type') || '';
 
-  useEffect(() => {
-    fetchProducts();
-  }, [q, type]);
-
-  const fetchProducts = () => {
+  const fetchProducts = useCallback(() => {
     setLoading(true);
     const params = new URLSearchParams();
     if (q) params.append('q', q);
@@ -29,7 +25,11 @@ export default function Store() {
         console.error(err);
         setLoading(false);
       });
-  };
+  }, [q, type]);
+
+  useEffect(() => {
+    fetchProducts();
+  }, [fetchProducts]);
 
   const updateFilter = (key: string, value: string) => {
     const newParams = new URLSearchParams(searchParams);

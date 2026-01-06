@@ -1,4 +1,4 @@
-import { useEffect, useState } from 'react';
+import { useEffect, useState, useCallback } from 'react';
 import { useParams, Link } from 'react-router-dom';
 import { api } from '../api/client';
 
@@ -17,7 +17,7 @@ export default function ClubDetail() {
   const [saving, setSaving] = useState(false);
   const [myClubs, setMyClubs] = useState<any[]>([]);
 
-  const loadData = async () => {
+  const loadData = useCallback(async () => {
     try {
       setLoading(true);
       const [clubRes, feedRes, myClubsRes] = await Promise.all([
@@ -37,9 +37,9 @@ export default function ClubDetail() {
       setError('Failed to load club');
       setLoading(false);
     }
-  };
+  }, [id]);
 
-  useEffect(() => { loadData(); }, [id]);
+  useEffect(() => { loadData(); }, [loadData]);
   useEffect(() => {
     api.get('/users/me').then(res => setCurrentUser(res.data)).catch(() => {});
   }, []);
@@ -51,7 +51,7 @@ export default function ClubDetail() {
     try {
       await api.post(`/clubs/${id}/join`);
       loadData();
-    } catch (error) {
+    } catch {
       alert('Failed to join');
     }
   };
@@ -61,7 +61,7 @@ export default function ClubDetail() {
     try {
         await api.post(`/clubs/${id}/leave`);
         loadData();
-    } catch (error) {
+    } catch {
         alert('Failed to leave (Owner cannot leave)');
     }
   };
@@ -73,7 +73,7 @@ export default function ClubDetail() {
       await api.post('/posts', { content: newPost, clubId: id });
       setNewPost('');
       loadData();
-    } catch (error) {
+    } catch {
       alert('Failed to post');
     }
   };
@@ -90,7 +90,7 @@ export default function ClubDetail() {
       });
       await loadData();
       setIsEditing(false);
-    } catch (error) {
+    } catch {
       alert('Failed to update club');
     }
     setSaving(false);

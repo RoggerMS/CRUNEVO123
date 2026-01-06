@@ -1,4 +1,4 @@
-import { useEffect, useState } from 'react';
+import { useEffect, useState, useCallback } from 'react';
 import { useParams } from 'react-router-dom';
 import { api } from '../api/client';
 
@@ -15,11 +15,7 @@ export default function DocumentDetail() {
     api.get('/users/me').then(res => setCurrentUser(res.data)).catch(() => {});
   }, []);
 
-  useEffect(() => {
-    loadDoc();
-  }, [id]);
-
-  const loadDoc = () => {
+  const loadDoc = useCallback(() => {
     api.get(`/documents/${id}`)
       .then(res => {
         setDoc(res.data);
@@ -30,7 +26,11 @@ export default function DocumentDetail() {
         setError('Failed to load document');
         setLoading(false);
       });
-  };
+  }, [id]);
+
+  useEffect(() => {
+    loadDoc();
+  }, [loadDoc]);
 
   const handleUploadVersion = async (e: React.FormEvent) => {
       e.preventDefault();
@@ -46,7 +46,7 @@ export default function DocumentDetail() {
           setFile(null);
           loadDoc();
           alert('New version uploaded!');
-      } catch (err) {
+      } catch {
           alert('Failed to upload version');
       }
   };

@@ -1,4 +1,4 @@
-import { useEffect, useState, useRef } from 'react';
+import { useEffect, useState, useRef, useCallback } from 'react';
 import { useParams, useNavigate } from 'react-router-dom';
 import { api } from '../api/client';
 import { Search, X } from 'lucide-react';
@@ -18,12 +18,33 @@ export default function Messages() {
   const [searchQuery, setSearchQuery] = useState('');
   const [searchResults, setSearchResults] = useState<any[]>([]);
 
+  const fetchConversations = useCallback(() => {
+    api.get('/messages/conversations')
+      .then(res => {
+        setConversations(res.data);
+        setLoadingConversations(false);
+        if (id) {
+            const current = res.data.find((c: any) => c.id === id);
+            if (current) setActiveConversation(current);
+        }
+      })
+      .catch(console.error);
+  }, [id]);
+
+  const fetchMessages = useCallback((convId: string) => {
+    api.get(`/messages/conversations/${convId}`)
+      .then(res => {
+        setMessages(res.data);
+      })
+      .catch(console.error);
+  }, []);
+
   // Polling for conversations list
   useEffect(() => {
     fetchConversations();
     const interval = setInterval(fetchConversations, 5000);
     return () => clearInterval(interval);
-  }, []);
+  }, [fetchConversations]);
 
   // Polling for messages in active conversation
   useEffect(() => {
@@ -35,33 +56,12 @@ export default function Messages() {
         setMessages([]);
         setActiveConversation(null);
     }
-  }, [id]);
+  }, [id, fetchMessages]);
 
   useEffect(() => {
     // Scroll to bottom when messages change
     messagesEndRef.current?.scrollIntoView({ behavior: 'smooth' });
   }, [messages]);
-
-  const fetchConversations = () => {
-    api.get('/messages/conversations')
-      .then(res => {
-        setConversations(res.data);
-        setLoadingConversations(false);
-        if (id) {
-            const current = res.data.find((c: any) => c.id === id);
-            if (current) setActiveConversation(current);
-        }
-      })
-      .catch(console.error);
-  };
-
-  const fetchMessages = (convId: string) => {
-    api.get(`/messages/conversations/${convId}`)
-      .then(res => {
-        setMessages(res.data);
-      })
-      .catch(console.error);
-  };
 
   const handleSendMessage = (e: React.FormEvent) => {
     e.preventDefault();
