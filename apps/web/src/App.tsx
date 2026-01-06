@@ -144,10 +144,7 @@ function Layout({ children }: { children: React.ReactNode }) {
   return (
     <div className="app-shell">
       {/* Sidebar for Desktop */}
-      <div className="sidebar-container" style={{ display: 'none' }}> 
-         {/* We will use media query in CSS or JS for responsive, for now assume desktop > 768px */}
-      </div>
-      <div style={{ display: 'block' }}> {/* Actually let's just force Sidebar for now since we want it */}
+      <div className="app-sidebar-wrapper">
           <Sidebar />
       </div>
 

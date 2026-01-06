@@ -330,6 +330,20 @@ th, td {
   }
 }
 
+.app-sidebar-wrapper {
+  display: block;
+}
+
+@media (max-width: 768px) {
+  .app-sidebar-wrapper {
+    display: none;
+  }
+  
+  .app-shell {
+    grid-template-columns: 1fr; /* Ensure main content takes full width */
+  }
+}
+
 .app-menu-section h4 {
   margin: 0 0 8px 0;
   font-size: 0.95rem;
