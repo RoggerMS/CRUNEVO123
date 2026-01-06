@@ -1,0 +1,336 @@
+.ask-page {
+  max-width: 1180px;
+  margin: 0 auto;
+  padding: 2rem 1.5rem 2.5rem;
+  background: radial-gradient(circle at 20% 20%, #f8fbff 0, #f8fafc 50%, #eef2f7 100%);
+  min-height: 100vh;
+}
+
+.ask-shell {
+  display: grid;
+  gap: 1.1rem;
+}
+
+.ask-back {
+  display: inline-flex;
+  align-items: center;
+  gap: 0.4rem;
+  color: #1d4ed8;
+  font-weight: 700;
+  text-decoration: none;
+  padding: 0.5rem 0.7rem;
+  border-radius: 12px;
+  background: #e0f2fe;
+  width: fit-content;
+  border: 1px solid #bfdbfe;
+  transition: transform 0.15s ease, box-shadow 0.2s ease;
+}
+
+.ask-back:hover {
+  transform: translateY(-1px);
+  box-shadow: 0 12px 24px rgba(37, 99, 235, 0.15);
+}
+
+.ask-hero {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 1rem;
+  padding: 1.35rem 1.5rem;
+  background: linear-gradient(135deg, #ffffff 0%, #f8fbff 100%);
+  border: 1px solid #e2e8f0;
+  border-radius: 18px;
+  box-shadow: 0 14px 38px rgba(15, 23, 42, 0.08);
+}
+
+.ask-hero h1 {
+  margin: 0;
+  font-size: 2rem;
+  color: #0f172a;
+  line-height: 1.1;
+}
+
+.ask-hero p {
+  margin: 0.2rem 0 0 0;
+  color: #475569;
+}
+
+.ask-hero-eyebrow {
+  display: inline-flex;
+  align-items: center;
+  gap: 0.35rem;
+  text-transform: uppercase;
+  letter-spacing: 0.08em;
+  font-size: 0.78rem;
+  color: #1d4ed8;
+  font-weight: 800;
+  padding: 0.25rem 0.7rem;
+  background: #e0f2fe;
+  border-radius: 999px;
+}
+
+.ask-grid {
+  display: grid;
+  grid-template-columns: 2fr 0.9fr;
+  gap: 1rem;
+  align-items: start;
+}
+
+.ask-card {
+  background: #fff;
+  border: 1px solid #e2e8f0;
+  border-radius: 16px;
+  box-shadow: 0 14px 32px rgba(15, 23, 42, 0.06);
+}
+
+.ask-form {
+  padding: 1.4rem;
+  display: grid;
+  gap: 1rem;
+}
+
+.ask-field {
+  display: grid;
+  gap: 0.5rem;
+}
+
+.ask-field-head {
+  display: flex;
+  align-items: baseline;
+  gap: 0.5rem;
+  justify-content: space-between;
+  flex-wrap: wrap;
+}
+
+.ask-field label {
+  font-weight: 800;
+  color: #0f172a;
+  font-size: 0.98rem;
+}
+
+.ask-helper {
+  color: #6b7280;
+  font-size: 0.85rem;
+}
+
+.ask-input,
+.ask-textarea {
+  width: 100%;
+  border: 1px solid #e5e7eb;
+  border-radius: 12px;
+  padding: 0.85rem 1rem;
+  font-size: 0.98rem;
+  background: #ffffff;
+  transition: border-color 0.15s ease, box-shadow 0.15s ease;
+}
+
+.ask-input:focus,
+.ask-textarea:focus {
+  outline: none;
+  border-color: #93c5fd;
+  box-shadow: 0 0 0 4px #e0f2fe;
+}
+
+.ask-textarea {
+  min-height: 190px;
+  resize: vertical;
+}
+
+.ask-meta {
+  display: flex;
+  justify-content: space-between;
+  font-size: 0.85rem;
+  color: #6b7280;
+}
+
+.ask-field-grid {
+  display: grid;
+  gap: 0.9rem;
+  grid-template-columns: repeat(auto-fit, minmax(220px, 1fr));
+}
+
+.ask-attachments {
+  gap: 0.65rem;
+}
+
+.ask-attachment-list {
+  display: grid;
+  gap: 0.55rem;
+}
+
+.ask-attachment-row {
+  display: grid;
+  grid-template-columns: 1fr auto;
+  gap: 0.5rem;
+  align-items: center;
+}
+
+.ask-remove {
+  border: none;
+  background: #fee2e2;
+  color: #b91c1c;
+  border-radius: 10px;
+  padding: 0.55rem 0.8rem;
+  font-weight: 800;
+  cursor: pointer;
+  transition: transform 0.15s ease, box-shadow 0.2s ease;
+}
+
+.ask-remove:hover {
+  transform: translateY(-1px);
+  box-shadow: 0 10px 20px rgba(185, 28, 28, 0.15);
+}
+
+.ask-add {
+  display: inline-flex;
+  align-items: center;
+  gap: 0.4rem;
+  background: #e0f2fe;
+  border: 1px solid #bfdbfe;
+  color: #1d4ed8;
+  border-radius: 10px;
+  padding: 0.55rem 0.9rem;
+  font-weight: 750;
+  cursor: pointer;
+  transition: transform 0.15s ease, box-shadow 0.2s ease;
+}
+
+.ask-add:hover {
+  transform: translateY(-1px);
+  box-shadow: 0 12px 24px rgba(37, 99, 235, 0.15);
+}
+
+.ask-actions {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 0.8rem;
+  padding-top: 0.5rem;
+  border-top: 1px solid #e2e8f0;
+}
+
+.ask-primary {
+  background: #2563eb;
+  color: #fff;
+  border: 1px solid #1d4ed8;
+  border-radius: 12px;
+  padding: 0.9rem 1.4rem;
+  font-weight: 800;
+  cursor: pointer;
+  box-shadow: 0 14px 30px rgba(37, 99, 235, 0.25);
+  transition: transform 0.15s ease, box-shadow 0.2s ease, filter 0.15s ease;
+}
+
+.ask-primary:hover:not(:disabled) {
+  transform: translateY(-1px);
+  box-shadow: 0 16px 36px rgba(37, 99, 235, 0.28);
+  filter: saturate(1.05);
+}
+
+.ask-primary:disabled {
+  opacity: 0.65;
+  cursor: not-allowed;
+  box-shadow: none;
+}
+
+.ask-secondary {
+  color: #475569;
+  text-decoration: none;
+  font-weight: 700;
+}
+
+.ask-alert {
+  display: inline-flex;
+  align-items: center;
+  gap: 0.4rem;
+  background: #fef2f2;
+  color: #b91c1c;
+  border: 1px solid #fecaca;
+  padding: 0.8rem 1rem;
+  border-radius: 12px;
+  box-shadow: 0 12px 26px rgba(185, 28, 28, 0.08);
+}
+
+.ask-aside {
+  display: grid;
+  gap: 0.9rem;
+}
+
+.ask-aside-title {
+  display: flex;
+  align-items: center;
+  gap: 0.5rem;
+  font-weight: 800;
+  color: #0f172a;
+  text-transform: uppercase;
+  letter-spacing: 0.05em;
+  font-size: 0.85rem;
+}
+
+.ask-similar ul,
+.ask-tips ul {
+  list-style: none;
+  margin: 0;
+  padding: 0;
+  display: grid;
+  gap: 0.65rem;
+}
+
+.ask-similar li a {
+  display: grid;
+  gap: 0.2rem;
+  text-decoration: none;
+  color: #0f172a;
+  padding: 0.55rem 0.6rem;
+  border-radius: 10px;
+  transition: background 0.15s ease, transform 0.15s ease;
+}
+
+.ask-similar li a:hover {
+  background: #f8fafc;
+  transform: translateY(-1px);
+}
+
+.ask-similar-title {
+  font-weight: 750;
+}
+
+.ask-similar-meta {
+  font-size: 0.85rem;
+  color: #6b7280;
+}
+
+.ask-tips ul li {
+  padding: 0.4rem 0.5rem;
+  background: #f8fafc;
+  border-radius: 10px;
+  color: #1d4ed8;
+  font-weight: 700;
+}
+
+@media (max-width: 1100px) {
+  .ask-grid {
+    grid-template-columns: 1fr;
+  }
+
+  .ask-aside {
+    grid-template-columns: repeat(auto-fit, minmax(240px, 1fr));
+  }
+}
+
+@media (max-width: 640px) {
+  .ask-hero {
+    flex-direction: column;
+    align-items: flex-start;
+  }
+
+  .ask-actions {
+    flex-direction: column;
+    align-items: flex-start;
+  }
+
+  .ask-primary {
+    width: 100%;
+    text-align: center;
+  }
+}

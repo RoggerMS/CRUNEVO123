@@ -1,7 +1,9 @@
 import { useEffect, useState } from 'react';
 import { api } from '../api/client';
 import { useNavigate, Link } from 'react-router-dom';
-import { ArrowLeft, Image as ImageIcon, HelpCircle } from 'lucide-react';
+import { ArrowLeft, Image as ImageIcon, HelpCircle, Lightbulb } from 'lucide-react';
+
+import './CreateQuestion.css';
 
 export default function CreateQuestion() {
   const [title, setTitle] = useState('');
@@ -56,31 +58,34 @@ export default function CreateQuestion() {
   };
 
   return (
-    <div className="max-w-3xl mx-auto px-4 py-8">
-      <Link to="/aula" className="inline-flex items-center text-gray-500 hover:text-blue-600 mb-6 transition-colors">
-        <ArrowLeft size={16} className="mr-2" />
-        Volver al Aula
-      </Link>
-      
-      <div className="mb-8 border-b border-gray-100 pb-6">
-        <h1 className="text-3xl font-bold text-gray-900 mb-2">Hacer una pregunta</h1>
-        <p className="text-gray-600 text-lg">Recibe ayuda de la comunidad en minutos</p>
-      </div>
+    <div className="ask-page">
+      <div className="ask-shell">
+        <Link to="/aula" className="ask-back">
+          <ArrowLeft size={16} />
+          Volver al Aula
+        </Link>
 
-      <div className="grid grid-cols-1 lg:grid-cols-3 gap-8">
-        <div className="lg:col-span-2">
-          <form onSubmit={handleSubmit} className="bg-white p-8 rounded-xl shadow-sm border border-gray-100 space-y-8">
+        <header className="ask-hero">
+          <span className="ask-hero-eyebrow">Aula</span>
+          <div>
+            <h1>Hacer una pregunta</h1>
+            <p>Recibe ayuda de la comunidad en minutos.</p>
+          </div>
+        </header>
+
+        <div className="ask-grid">
+          <form onSubmit={handleSubmit} className="ask-card ask-form">
             {error && (
-              <div className="bg-red-50 text-red-600 p-4 rounded-lg text-sm flex items-center gap-2">
+              <div className="ask-alert" role="alert">
                 <span>⚠️</span> {error}
               </div>
             )}
-            
-            <div>
-              <label className="block text-base font-semibold text-gray-800 mb-2">
-                Título de tu pregunta
-              </label>
-              <p className="text-sm text-gray-500 mb-2">Un buen título resume el problema en una frase corta y directa.</p>
+
+            <div className="ask-field">
+              <div className="ask-field-head">
+                <label>Título de tu pregunta</label>
+                <span className="ask-helper">Un buen título resume el problema en una frase corta y directa.</span>
+              </div>
               <input
                 placeholder="Ej: ¿Cómo resuelvo esta ecuación cuadrática?"
                 value={title}
@@ -88,21 +93,19 @@ export default function CreateQuestion() {
                 required
                 minLength={8}
                 maxLength={titleMax}
-                className="w-full px-4 py-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-blue-500 outline-none transition-all"
+                className="ask-input"
               />
-              <p className="text-xs text-gray-400 mt-2 flex items-center justify-between">
-                <span className="text-gray-500">Sé concreto y directo.</span>
-                <span>
-                  {title.length}/{titleMax} <span className="text-gray-300">|</span> mínimo 8
-                </span>
+              <p className="ask-meta">
+                <span>Sé concreto y directo.</span>
+                <span>{title.length}/{titleMax} | mínimo 8</span>
               </p>
             </div>
 
-            <div>
-              <label className="block text-base font-semibold text-gray-800 mb-2">
-                Detalles y contexto
-              </label>
-              <p className="text-sm text-gray-500 mb-2">Explica qué intentaste y dónde te atascaste. Cuantos más detalles, mejor respuesta.</p>
+            <div className="ask-field">
+              <div className="ask-field-head">
+                <label>Detalles y contexto</label>
+                <span className="ask-helper">Explica qué intentaste y dónde te atascaste. Cuantos más detalles, mejor respuesta.</span>
+              </div>
               <textarea
                 placeholder="Explica tu problema con el mayor detalle posible..."
                 value={body}
@@ -110,66 +113,66 @@ export default function CreateQuestion() {
                 required
                 minLength={20}
                 maxLength={bodyMax}
-                className="w-full px-4 py-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-blue-500 outline-none min-h-[180px] transition-all"
+                className="ask-textarea"
               />
-              <p className="text-xs text-gray-400 mt-2 flex items-center justify-between">
-                <span className="text-gray-500">Incluye pasos, código o capturas para contextualizar.</span>
-                <span>
-                  {body.length}/{bodyMax} <span className="text-gray-300">|</span> mínimo 20
-                </span>
+              <p className="ask-meta">
+                <span>Incluye pasos, código o capturas para contextualizar.</span>
+                <span>{body.length}/{bodyMax} | mínimo 20</span>
               </p>
             </div>
 
-            <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
-              <div>
-                <label className="block text-sm font-semibold text-gray-700 mb-2">Materia</label>
+            <div className="ask-field-grid">
+              <div className="ask-field">
+                <div className="ask-field-head">
+                  <label>Materia</label>
+                  <span className="ask-helper">Dónde encaja mejor tu duda.</span>
+                </div>
                 <input
                   placeholder="Ej: Matemáticas"
                   value={subject}
                   onChange={e => setSubject(e.target.value)}
                   required
-                  className="w-full px-4 py-2.5 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 outline-none"
+                  className="ask-input"
                 />
               </div>
-              <div>
-                <label className="block text-sm font-semibold text-gray-700 mb-2">Tags</label>
+              <div className="ask-field">
+                <div className="ask-field-head">
+                  <label>Tags</label>
+                  <span className="ask-helper">Separa por coma (máx. 5 tags).</span>
+                </div>
                 <input
                   placeholder="Ej: algebra, ecuaciones"
                   value={tags}
                   onChange={e => setTags(e.target.value)}
                   required
-                  className="w-full px-4 py-2.5 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 outline-none"
+                  className="ask-input"
                 />
-                <p className="text-xs text-gray-500 mt-1">Separados por coma (máx. 5 tags).</p>
               </div>
             </div>
 
-            <div className="bg-gray-50 p-5 rounded-lg border border-gray-100">
-              <label className="block text-sm font-semibold text-gray-700 mb-2 flex items-center gap-2">
-                <ImageIcon size={16} />
-                Imágenes de referencia (Opcional)
-              </label>
-              <p className="text-xs text-gray-500 mb-3">
-                Pega la URL de tu imagen (ej. subida a Imgur o Drive público). Máximo 5 imágenes.
-              </p>
-              <div className="space-y-3">
+            <div className="ask-field ask-attachments">
+              <div className="ask-field-head">
+                <label><ImageIcon size={16} /> Imágenes de referencia (Opcional)</label>
+                <span className="ask-helper">Pega la URL (Imgur o Drive público). Máximo 5 imágenes.</span>
+              </div>
+              <div className="ask-attachment-list">
                 {attachments.map((url, idx) => (
-                  <div key={idx} className="flex gap-2">
-                    <input 
-                      placeholder="https://..." 
-                      value={url} 
+                  <div key={idx} className="ask-attachment-row">
+                    <input
+                      placeholder="https://..."
+                      value={url}
                       onChange={e => {
                         const newAtts = [...attachments];
                         newAtts[idx] = e.target.value;
                         setAttachments(newAtts);
-                      }} 
-                      className="flex-1 px-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 outline-none text-sm bg-white"
+                      }}
+                      className="ask-input"
                     />
                     {attachments.length > 1 && (
-                      <button 
-                        type="button" 
+                      <button
+                        type="button"
                         onClick={() => setAttachments(attachments.filter((_, i) => i !== idx))}
-                        className="text-gray-400 hover:text-red-500 px-2 transition-colors"
+                        className="ask-remove"
                         title="Eliminar campo"
                       >
                         ✕
@@ -177,80 +180,65 @@ export default function CreateQuestion() {
                     )}
                   </div>
                 ))}
-                {attachments.length < 5 && (
-                  <button 
-                    type="button" 
-                    onClick={() => setAttachments([...attachments, ''])}
-                    className="text-sm text-blue-600 font-medium hover:text-blue-800 flex items-center gap-1 mt-2 transition-colors"
-                  >
-                    + Añadir otra imagen
-                  </button>
-                )}
               </div>
+              {attachments.length < 5 && (
+                <button
+                  type="button"
+                  onClick={() => setAttachments([...attachments, ''])}
+                  className="ask-add"
+                >
+                  + Añadir otra imagen
+                </button>
+              )}
             </div>
 
-            <div className="pt-6 border-t border-gray-100 flex items-center justify-between">
-              <Link to="/aula" className="text-gray-500 hover:text-gray-700 font-medium text-sm">
-                Cancelar y volver
-              </Link>
-              <button 
-                className="bg-blue-600 text-white px-8 py-3 rounded-lg font-semibold hover:bg-blue-700 transition-all disabled:opacity-50 disabled:cursor-not-allowed shadow-sm hover:shadow-md"
+            <div className="ask-actions">
+              <Link to="/aula" className="ask-secondary">Cancelar y volver</Link>
+              <button
+                className="ask-primary"
                 disabled={loading || title.length < 8 || body.length < 20 || !subject || !tags}
               >
                 {loading ? 'Publicando...' : 'Publicar Pregunta'}
               </button>
             </div>
           </form>
-        </div>
 
-        <div className="lg:col-span-1 space-y-6">
-          {similar.length > 0 ? (
-            <div className="bg-yellow-50 border border-yellow-200 rounded-xl p-5 sticky top-4 animate-fade-in">
-              <h3 className="font-bold text-yellow-800 mb-3 text-sm uppercase tracking-wide flex items-center gap-2">
-                <HelpCircle size={16} />
-                ¿Tu pregunta ya existe?
-              </h3>
-              <ul className="space-y-3">
-                {similar.map(s => (
-                  <li key={s.id}>
-                    <a 
-                      href={`/aula/${s.id}`} 
-                      target="_blank" 
-                      rel="noopener noreferrer"
-                      className="block group"
-                    >
-                      <span className="text-gray-900 font-medium group-hover:text-blue-600 text-sm leading-snug block mb-1">
-                        {s.title}
-                      </span>
-                      <span className="text-xs text-gray-500 block">
-                        {s._count?.answers || 0} respuestas • {s.subject}
-                      </span>
-                    </a>
-                  </li>
-                ))}
-              </ul>
-            </div>
-          ) : (
-            <div className="bg-blue-50 border border-blue-100 rounded-xl p-5 text-sm text-blue-800 sticky top-4">
-              <h3 className="font-bold mb-3 flex items-center gap-2">
-                <span className="text-xl">💡</span> Consejos pro
-              </h3>
-              <ul className="space-y-2 text-blue-700/90">
-                <li className="flex gap-2">
-                  <span>•</span>
-                  <span>Sé específico: "¿Cómo derivo x^2?" es mejor que "Ayuda mates".</span>
-                </li>
-                <li className="flex gap-2">
-                  <span>•</span>
-                  <span>Muestra lo que has intentado.</span>
-                </li>
-                <li className="flex gap-2">
-                  <span>•</span>
-                  <span>Revisa la ortografía para que sea fácil de leer.</span>
-                </li>
-              </ul>
-            </div>
-          )}
+          <div className="ask-aside">
+            {similar.length > 0 ? (
+              <div className="ask-card ask-similar">
+                <div className="ask-aside-title">
+                  <HelpCircle size={16} />
+                  ¿Tu pregunta ya existe?
+                </div>
+                <ul>
+                  {similar.map(s => (
+                    <li key={s.id}>
+                      <a
+                        href={`/aula/${s.id}`}
+                        target="_blank"
+                        rel="noopener noreferrer"
+                      >
+                        <span className="ask-similar-title">{s.title}</span>
+                        <span className="ask-similar-meta">{s._count?.answers || 0} respuestas • {s.subject}</span>
+                      </a>
+                    </li>
+                  ))}
+                </ul>
+              </div>
+            ) : (
+              <div className="ask-card ask-tips">
+                <div className="ask-aside-title">
+                  <Lightbulb size={16} />
+                  Consejos pro
+                </div>
+                <ul>
+                  <li>Sé específico: "¿Cómo derivo x^2?" es mejor que "Ayuda mates".</li>
+                  <li>Muestra lo que has intentado.</li>
+                  <li>Revisa la ortografía para que sea fácil de leer.</li>
+                </ul>
+              </div>
+            )}
+          </div>
         </div>
       </div>
     </div>
