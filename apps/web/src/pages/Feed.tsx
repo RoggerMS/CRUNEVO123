@@ -2,6 +2,7 @@ import { useEffect, useState, useRef } from 'react';
 import { api } from '../api/client';
 import { Link } from 'react-router-dom';
 import { formatApiErrorMessage } from '../api/error';
+import { Eye } from 'lucide-react';
 
 const API_URL = import.meta.env.VITE_API_URL || 'http://localhost:3000';
 
@@ -270,7 +271,11 @@ export default function Feed() {
           ) : (
             <div style={{ display: 'flex', flexDirection: 'column', gap: '1rem' }}>
               {items.map((item) => (
-                <div key={item.id} className="card">
+                <div key={item.id} className="card feed-card">
+                  <div className="feed-view-counter" aria-label={`Visto ${views[item.id] || 0} veces`}>
+                    <Eye size={16} />
+                    <span>{views[item.id] || 0}</span>
+                  </div>
                   <div className="meta">
                     {item.type} • 
                     <span style={{ fontWeight: 'bold', color: '#333' }}> @{item.owner?.username || item.author?.username} </span>
@@ -335,7 +340,6 @@ export default function Feed() {
                     <div style={{ display: 'flex', gap: '16px', alignItems: 'center' }}>
                       <button onClick={() => handleToggleLike(item)} style={{ background: 'transparent', border: 'none', cursor: 'pointer' }}>👍 {item._count?.likes || 0}</button>
                       <button onClick={() => toggleComments(item)} style={{ background: 'transparent', border: 'none', cursor: 'pointer' }}>💬 {item._count?.comments || 0}</button>
-                      <span>👀 {views[item.id] || 0}</span>
                       {currentUser?.role === 'ADMIN' && <button disabled style={{ background: 'transparent', border: 'none', cursor: 'not-allowed' }}>📌</button>}
                     </div>
                     {item.type === 'QUESTION' && <span>Respuestas: {item._count?.answers || 0}</span>}
