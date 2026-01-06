@@ -11,7 +11,7 @@
   --error-bg: #ffebee;
   --success-color: #28a745;
   --success-bg: #e8f5e9;
-  
+
   font-family: system-ui, -apple-system, "Segoe UI", Roboto, "Helvetica Neue", Arial, sans-serif;
   line-height: 1.5;
   color: var(--text-color);
@@ -40,7 +40,8 @@ nav a {
   transition: color 0.2s;
 }
 
-nav a:hover, nav a.active {
+nav a:hover,
+nav a.active {
   color: #fff;
 }
 
@@ -198,6 +199,7 @@ th, td {
   box-shadow: 0 4px 6px rgba(0,0,0,0.05);
 }
 
+/* ===== App Shell / Layout ===== */
 .app-shell {
   display: flex;
   background: #f8f9fa;
@@ -206,6 +208,7 @@ th, td {
 
 .app-sidebar-wrapper {
   flex-shrink: 0;
+  display: block;
 }
 
 .app-main {
@@ -216,6 +219,7 @@ th, td {
   width: 100%;
 }
 
+/* ===== Topbar ===== */
 .topbar {
   position: relative;
   display: flex;
@@ -264,6 +268,7 @@ th, td {
   object-fit: cover;
 }
 
+/* ===== App Menu (panel) ===== */
 .app-menu-panel {
   position: absolute;
   top: 52px;
@@ -316,6 +321,7 @@ th, td {
   outline: none;
   width: 100%;
   font-size: 0.95rem;
+  margin-bottom: 0; /* importante: no heredar el margin-bottom global */
 }
 
 .app-menu-search-icon {
@@ -394,11 +400,8 @@ th, td {
   border-radius: 12px;
 }
 
+/* ===== Responsive ===== */
 @media (max-width: 768px) {
-  .app-shell {
-    flex-direction: column;
-  }
-
   .app-sidebar-wrapper {
     display: none;
   }
@@ -412,6 +415,7 @@ th, td {
   }
 }
 
+/* ===== Landing Hero ===== */
 .hero h1 {
   font-size: 3rem;
   margin-bottom: 1rem;
