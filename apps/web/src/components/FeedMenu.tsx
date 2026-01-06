@@ -1,4 +1,4 @@
-import React, { useState, useRef, useEffect } from 'react';
+import { useState, useRef, useEffect } from 'react';
 import { MoreHorizontal, Flag, EyeOff, Bookmark, Trash2, HelpCircle, Lock, Eye } from 'lucide-react';
 
 interface FeedMenuProps {
