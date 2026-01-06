@@ -13,6 +13,8 @@ export default function CreateQuestion() {
   const [error, setError] = useState('');
   const [similar, setSimilar] = useState<any[]>([]);
   const navigate = useNavigate();
+  const titleMax = 120;
+  const bodyMax = 1500;
 
   useEffect(() => {
     const handler = setTimeout(() => {
@@ -29,14 +31,19 @@ export default function CreateQuestion() {
 
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
+    const parsedTags = tags.split(',').map(t => t.trim()).filter(Boolean);
+    if (parsedTags.length > 5) {
+      setError('Máximo 5 tags para mantener la pregunta clara.');
+      return;
+    }
     setLoading(true);
     setError('');
     try {
-      await api.post('/aula/questions', { 
-        title, 
-        body, 
+      await api.post('/aula/questions', {
+        title,
+        body,
         subject,
-        tags: tags.split(',').map(t => t.trim()).filter(Boolean),
+        tags: parsedTags,
         attachments: attachments.filter(Boolean),
       });
       navigate('/aula');
@@ -74,16 +81,20 @@ export default function CreateQuestion() {
                 Título de tu pregunta
               </label>
               <p className="text-sm text-gray-500 mb-2">Un buen título resume el problema en una frase corta y directa.</p>
-              <input 
-                placeholder="Ej: ¿Cómo resuelvo esta ecuación cuadrática?" 
-                value={title} 
-                onChange={e => setTitle(e.target.value)} 
-                required 
+              <input
+                placeholder="Ej: ¿Cómo resuelvo esta ecuación cuadrática?"
+                value={title}
+                onChange={e => setTitle(e.target.value)}
+                required
                 minLength={8}
+                maxLength={titleMax}
                 className="w-full px-4 py-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-blue-500 outline-none transition-all"
               />
-              <p className="text-xs text-gray-400 mt-2 text-right">
-                {title.length} caracteres <span className="text-gray-300">|</span> mínimo 8
+              <p className="text-xs text-gray-400 mt-2 flex items-center justify-between">
+                <span className="text-gray-500">Sé concreto y directo.</span>
+                <span>
+                  {title.length}/{titleMax} <span className="text-gray-300">|</span> mínimo 8
+                </span>
               </p>
             </div>
 
@@ -92,40 +103,44 @@ export default function CreateQuestion() {
                 Detalles y contexto
               </label>
               <p className="text-sm text-gray-500 mb-2">Explica qué intentaste y dónde te atascaste. Cuantos más detalles, mejor respuesta.</p>
-              <textarea 
-                placeholder="Explica tu problema con el mayor detalle posible..." 
-                value={body} 
-                onChange={e => setBody(e.target.value)} 
-                required 
-                minLength={20} 
+              <textarea
+                placeholder="Explica tu problema con el mayor detalle posible..."
+                value={body}
+                onChange={e => setBody(e.target.value)}
+                required
+                minLength={20}
+                maxLength={bodyMax}
                 className="w-full px-4 py-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-blue-500 outline-none min-h-[180px] transition-all"
               />
-              <p className="text-xs text-gray-400 mt-2 text-right">
-                {body.length} caracteres <span className="text-gray-300">|</span> mínimo 20
+              <p className="text-xs text-gray-400 mt-2 flex items-center justify-between">
+                <span className="text-gray-500">Incluye pasos, código o capturas para contextualizar.</span>
+                <span>
+                  {body.length}/{bodyMax} <span className="text-gray-300">|</span> mínimo 20
+                </span>
               </p>
             </div>
 
             <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
               <div>
                 <label className="block text-sm font-semibold text-gray-700 mb-2">Materia</label>
-                <input 
-                  placeholder="Ej: Matemáticas" 
-                  value={subject} 
-                  onChange={e => setSubject(e.target.value)} 
-                  required 
+                <input
+                  placeholder="Ej: Matemáticas"
+                  value={subject}
+                  onChange={e => setSubject(e.target.value)}
+                  required
                   className="w-full px-4 py-2.5 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 outline-none"
                 />
               </div>
               <div>
                 <label className="block text-sm font-semibold text-gray-700 mb-2">Tags</label>
-                <input 
-                  placeholder="Ej: algebra, ecuaciones" 
-                  value={tags} 
-                  onChange={e => setTags(e.target.value)} 
-                  required 
+                <input
+                  placeholder="Ej: algebra, ecuaciones"
+                  value={tags}
+                  onChange={e => setTags(e.target.value)}
+                  required
                   className="w-full px-4 py-2.5 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 outline-none"
                 />
-                <p className="text-xs text-gray-500 mt-1">Separados por coma</p>
+                <p className="text-xs text-gray-500 mt-1">Separados por coma (máx. 5 tags).</p>
               </div>
             </div>
 
@@ -135,7 +150,7 @@ export default function CreateQuestion() {
                 Imágenes de referencia (Opcional)
               </label>
               <p className="text-xs text-gray-500 mb-3">
-                Pega la URL de tu imagen (ej. subida a Imgur o Drive público).
+                Pega la URL de tu imagen (ej. subida a Imgur o Drive público). Máximo 5 imágenes.
               </p>
               <div className="space-y-3">
                 {attachments.map((url, idx) => (
