@@ -7,6 +7,8 @@
 - Nueva sección en el panel de administración para crear, editar y ordenar elementos del sidebar.
 ### Changed
 - Diseño del feed actualizado para mejor respuesta en móviles y métricas rápidas.
+- Renovado el diseño del listado de Aula para alinearlo con la experiencia de creación y detalle (tarjetas, filtros y tabs unificados).
+- Página de creación y detalle de preguntas en Aula rediseñadas para alinearse visualmente y corregir estilos rotos.
 
 ## [Iteración 5] - 2026-01-03
 ### Added
