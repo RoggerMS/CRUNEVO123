@@ -2,7 +2,8 @@ import { useEffect, useState, useRef } from 'react';
 import { api } from '../api/client';
 import { Link } from 'react-router-dom';
 import { formatApiErrorMessage } from '../api/error';
-import { Eye } from 'lucide-react';
+import { Eye, Settings } from 'lucide-react';
+import FeedMenu from '../components/FeedMenu';
 
 const API_URL = import.meta.env.VITE_API_URL || 'http://localhost:3000';
 
@@ -25,7 +26,21 @@ export default function Feed() {
   const [newCommentBody, setNewCommentBody] = useState<Record<string, string>>({});
   const [sidebarItems, setSidebarItems] = useState<any[]>([]);
   const [viewVisibility, setViewVisibility] = useState<Record<string, boolean>>({});
-  const [openMenuId, setOpenMenuId] = useState<string | null>(null);
+  const [globalViewPublic, setGlobalViewPublic] = useState(false);
+
+  useEffect(() => {
+    const storedPref = localStorage.getItem('globalViewPublic');
+    if (storedPref) {
+      setGlobalViewPublic(storedPref === 'true');
+    }
+  }, []);
+
+  const toggleGlobalViewPublic = () => {
+    const newValue = !globalViewPublic;
+    setGlobalViewPublic(newValue);
+    localStorage.setItem('globalViewPublic', String(newValue));
+    alert(`Preferencia global actualizada: Vistas ${newValue ? 'públicas' : 'privadas'} por defecto.`);
+  };
 
   const loadFeed = () => {
     setLoading(true);
@@ -38,11 +53,18 @@ export default function Feed() {
         const data = res[0].data;
         setItems(data);
         const v: Record<string, number> = {};
-        const visibilityPref: Record<string, boolean> = {};
-        data.forEach((it: any) => { v[it.id] = (views[it.id] || 0) + 1; });
-        data.forEach((it: any) => { visibilityPref[it.id] = false; });
-        setViews(v);
-        setViewVisibility(visibilityPref);
+        
+        // Mock views count since backend doesn't provide it yet
+        // TODO: Replace with real view count from API
+        data.forEach((it: any) => { 
+            if (!views[it.id]) {
+                v[it.id] = Math.floor(Math.random() * 50) + 1; 
+            } else {
+                v[it.id] = views[it.id];
+            }
+        });
+        
+        setViews(prev => ({ ...prev, ...v }));
         setSidebarItems(Array.isArray(res[1].data) ? res[1].data : []);
         setLoading(false);
       })
@@ -145,8 +167,10 @@ export default function Feed() {
     }
   };
 
-  const toggleViewVisibility = (itemId: string) => {
-    setViewVisibility(prev => ({ ...prev, [itemId]: !prev[itemId] }));
+  const toggleViewVisibility = (item: any) => {
+    const isAuth = isAuthor(item);
+    const current = viewVisibility[item.id] ?? (isAuth ? globalViewPublic : false);
+    setViewVisibility(prev => ({ ...prev, [item.id]: !current }));
   };
 
   const handleHideItem = (itemId: string) => {
@@ -303,39 +327,26 @@ export default function Feed() {
                         <span>{views[item.id] || 0}</span>
                       </div>
                     )}
-                    <div className="feed-menu">
-                      <button 
-                        type="button" 
-                        className="feed-menu-trigger" 
-                        aria-label="Abrir opciones de la publicación"
-                        onClick={() => setOpenMenuId(openMenuId === item.id ? null : item.id)}
-                      >
-                        ⋯
-                      </button>
-                      {openMenuId === item.id && (
-                        <div className="feed-menu-dropdown" role="menu">
-                          <button type="button" role="menuitem" onClick={() => alert('Reporte enviado')}>Reportar</button>
-                          <button type="button" role="menuitem" onClick={() => alert('Marcaremos menos publicaciones como esta')}>No me interesa</button>
-                          <button type="button" role="menuitem" onClick={() => alert('Guardado en marcadores')}>Guardar</button>
-                          <button type="button" role="menuitem" onClick={() => handleHideItem(item.id)}>Ocultar</button>
-                          <button type="button" role="menuitem" onClick={() => alert('Ves esta publicación porque sigues o interactuaste con este usuario.')}>¿Por qué veo esta publicación?</button>
-                          {isAuthor(item) && (
-                            <>
-                              <hr />
-                              <div className="feed-menu-section-title">Configuración del autor</div>
-                              <button
-                                type="button"
-                                role="menuitem"
-                                onClick={() => toggleViewVisibility(item.id)}
-                              >
-                                {viewVisibility[item.id] ? 'Ocultar vistas al público' : 'Mostrar vistas al público'}
-                              </button>
-                              <button type="button" role="menuitem" onClick={() => alert('Abrir configuración de privacidad del post')}>Privacidad del post</button>
-                            </>
-                          )}
-                        </div>
-                      )}
-                    </div>
+                    <FeedMenu
+                      isAuthor={isAuthor(item)}
+                      viewVisibility={viewVisibility[item.id] ?? (isAuthor(item) ? globalViewPublic : false)}
+                      onToggleViewVisibility={() => toggleViewVisibility(item)}
+                      onHide={() => handleHideItem(item.id)}
+                      onReport={() => alert('Reporte enviado. Gracias por ayudar a mantener la comunidad segura.')}
+                      onNotInterested={() => alert('Entendido. Mostraremos menos contenido como este.')}
+                      onBookmark={() => {
+                        if (item.type === 'POST') {
+                            alert('Guardado (simulado) - API pendiente para posts');
+                        } else {
+                            const type = item.type === 'DOCUMENT' ? 'document' : 'question';
+                            api.post(`/bookmarks/${type}/${item.id}`)
+                               .then(() => alert('Guardado en marcadores'))
+                               .catch(() => alert('Error al guardar'));
+                        }
+                      }}
+                      onExplain={() => alert('Ves esta publicación porque es popular en tu red o sigues al autor.')}
+                      onPrivacy={() => alert('Configuración de privacidad del post (Placeholder)')}
+                    />
                   </div>
                   <div className="meta">
                     {item.type} • 
@@ -438,7 +449,18 @@ export default function Feed() {
 
         <div>
           <div className="card" style={{ marginBottom: '1rem' }}>
-            <h3>Avisos importantes</h3>
+            <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: '0.5rem' }}>
+                <h3 style={{ margin: 0 }}>Avisos importantes</h3>
+                <button 
+                    className="btn" 
+                    onClick={toggleGlobalViewPublic}
+                    title="Configuración de privacidad de vistas"
+                    style={{ padding: '0.25rem 0.5rem', display: 'flex', alignItems: 'center', gap: '0.25rem', fontSize: '0.8rem' }}
+                >
+                    <Settings size={14} />
+                    {globalViewPublic ? 'Vistas Públicas' : 'Vistas Privadas'}
+                </button>
+            </div>
             {notifications.length === 0 ? (
               <div>No hay avisos</div>
             ) : (
