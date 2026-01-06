@@ -24,6 +24,8 @@ export default function Feed() {
   const [commentsData, setCommentsData] = useState<Record<string, any[]>>({});
   const [newCommentBody, setNewCommentBody] = useState<Record<string, string>>({});
   const [sidebarItems, setSidebarItems] = useState<any[]>([]);
+  const [viewVisibility, setViewVisibility] = useState<Record<string, boolean>>({});
+  const [openMenuId, setOpenMenuId] = useState<string | null>(null);
 
   const loadFeed = () => {
     setLoading(true);
@@ -36,8 +38,11 @@ export default function Feed() {
         const data = res[0].data;
         setItems(data);
         const v: Record<string, number> = {};
+        const visibilityPref: Record<string, boolean> = {};
         data.forEach((it: any) => { v[it.id] = (views[it.id] || 0) + 1; });
+        data.forEach((it: any) => { visibilityPref[it.id] = false; });
         setViews(v);
+        setViewVisibility(visibilityPref);
         setSidebarItems(Array.isArray(res[1].data) ? res[1].data : []);
         setLoading(false);
       })
@@ -138,6 +143,25 @@ export default function Feed() {
     } catch {
       alert('No se pudo publicar el comentario');
     }
+  };
+
+  const toggleViewVisibility = (itemId: string) => {
+    setViewVisibility(prev => ({ ...prev, [itemId]: !prev[itemId] }));
+  };
+
+  const handleHideItem = (itemId: string) => {
+    setItems(items.filter(it => it.id !== itemId));
+  };
+
+  const isAuthor = (item: any) => {
+    const itemOwnerId = item.owner?.id || item.author?.id;
+    return currentUser && itemOwnerId && currentUser.id === itemOwnerId;
+  };
+
+  // Only authors see view counts by default; they can optionally share counts publicly per post.
+  const shouldShowViews = (item: any) => {
+    if (isAuthor(item)) return true;
+    return viewVisibility[item.id] === true;
   };
 
   if (loading && items.length === 0) return <div>Loading...</div>;
@@ -272,9 +296,46 @@ export default function Feed() {
             <div style={{ display: 'flex', flexDirection: 'column', gap: '1rem' }}>
               {items.map((item) => (
                 <div key={item.id} className="card feed-card">
-                  <div className="feed-view-counter" aria-label={`Visto ${views[item.id] || 0} veces`}>
-                    <Eye size={16} />
-                    <span>{views[item.id] || 0}</span>
+                  <div className="feed-card-actions">
+                    {shouldShowViews(item) && (
+                      <div className="feed-view-counter" aria-label={`Visto ${views[item.id] || 0} veces`}>
+                        <Eye size={16} />
+                        <span>{views[item.id] || 0}</span>
+                      </div>
+                    )}
+                    <div className="feed-menu">
+                      <button 
+                        type="button" 
+                        className="feed-menu-trigger" 
+                        aria-label="Abrir opciones de la publicación"
+                        onClick={() => setOpenMenuId(openMenuId === item.id ? null : item.id)}
+                      >
+                        ⋯
+                      </button>
+                      {openMenuId === item.id && (
+                        <div className="feed-menu-dropdown" role="menu">
+                          <button type="button" role="menuitem" onClick={() => alert('Reporte enviado')}>Reportar</button>
+                          <button type="button" role="menuitem" onClick={() => alert('Marcaremos menos publicaciones como esta')}>No me interesa</button>
+                          <button type="button" role="menuitem" onClick={() => alert('Guardado en marcadores')}>Guardar</button>
+                          <button type="button" role="menuitem" onClick={() => handleHideItem(item.id)}>Ocultar</button>
+                          <button type="button" role="menuitem" onClick={() => alert('Ves esta publicación porque sigues o interactuaste con este usuario.')}>¿Por qué veo esta publicación?</button>
+                          {isAuthor(item) && (
+                            <>
+                              <hr />
+                              <div className="feed-menu-section-title">Configuración del autor</div>
+                              <button
+                                type="button"
+                                role="menuitem"
+                                onClick={() => toggleViewVisibility(item.id)}
+                              >
+                                {viewVisibility[item.id] ? 'Ocultar vistas al público' : 'Mostrar vistas al público'}
+                              </button>
+                              <button type="button" role="menuitem" onClick={() => alert('Abrir configuración de privacidad del post')}>Privacidad del post</button>
+                            </>
+                          )}
+                        </div>
+                      )}
+                    </div>
                   </div>
                   <div className="meta">
                     {item.type} • 
