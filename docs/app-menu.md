@@ -21,3 +21,4 @@ El botón de 9 puntos en el encabezado abre un menú rápido con todas las secci
 - Usa íconos de `lucide-react` importándolos al inicio de `App.tsx` para mantener el mismo estilo.
 - El menú incluye un buscador; cualquier nueva entrada será indexada automáticamente porque la búsqueda recorre `label` y `description`.
 - Si agregas rutas protegidas por rol (ej. admin), puedes condicionar las secciones igual que el bloque existente que solo se muestra para `currentUser?.role === 'ADMIN'.`
+- En pantallas chicas (<768px) el sidebar lateral se oculta; el lanzador superior queda como navegación principal, así que asegúrate de que todo lo esencial esté listado ahí.
