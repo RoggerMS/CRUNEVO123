@@ -2,10 +2,8 @@ import { useEffect, useState, useRef, useCallback } from 'react';
 import { api } from '../api/client';
 import { Link } from 'react-router-dom';
 import { formatApiErrorMessage } from '../api/error';
-import { Eye, Settings } from 'lucide-react';
-import FeedMenu from '../components/FeedMenu';
-
-const API_URL = import.meta.env.VITE_API_URL || 'http://localhost:3000';
+import { Settings } from 'lucide-react';
+import FeedItem from '../components/FeedItem';
 
 export default function Feed() {
   const [items, setItems] = useState<any[]>([]);
@@ -27,6 +25,7 @@ export default function Feed() {
   const [sidebarItems, setSidebarItems] = useState<any[]>([]);
   const [viewVisibility, setViewVisibility] = useState<Record<string, boolean>>({});
   const [globalViewPublic, setGlobalViewPublic] = useState(false);
+  const [likedItems, setLikedItems] = useState<Record<string, boolean>>({});
 
   useEffect(() => {
     const storedPref = localStorage.getItem('globalViewPublic');
@@ -131,12 +130,23 @@ export default function Feed() {
   };
 
   const handleToggleLike = async (item: any) => {
+    const wasLiked = likedItems[item.id] || false;
+    // Optimistic update
+    setLikedItems(prev => ({ ...prev, [item.id]: !wasLiked }));
+
     try {
       const res = await api.post(`/likes/${typeToPath(item.type)}/${item.id}/toggle`);
       const newItems = items.map(it => it.id === item.id ? { ...it, _count: { ...(it._count || {}), likes: res.data.count } } : it);
       setItems(newItems);
+
+      // Confirm with backend state
+      if (res.data && typeof res.data.liked === 'boolean') {
+        setLikedItems(prev => ({ ...prev, [item.id]: res.data.liked }));
+      }
     } catch {
       alert('No se pudo registrar el like');
+      // Revert
+      setLikedItems(prev => ({ ...prev, [item.id]: wasLiked }));
     }
   };
 
@@ -322,129 +332,25 @@ export default function Feed() {
           ) : (
             <div style={{ display: 'flex', flexDirection: 'column', gap: '1rem' }}>
               {items.map((item) => (
-                <div key={item.id} className="card feed-card">
-                  <div className="feed-card-actions">
-                    {shouldShowViews(item) && (
-                      <div className="feed-view-counter" aria-label={`Visto ${views[item.id] || 0} veces`}>
-                        <Eye size={16} />
-                        <span>{views[item.id] || 0}</span>
-                      </div>
-                    )}
-                    <FeedMenu
-                      isAuthor={isAuthor(item)}
-                      viewVisibility={viewVisibility[item.id] ?? (isAuthor(item) ? globalViewPublic : false)}
-                      onToggleViewVisibility={() => toggleViewVisibility(item)}
-                      onHide={() => handleHideItem(item.id)}
-                      onReport={() => alert('Reporte enviado. Gracias por ayudar a mantener la comunidad segura.')}
-                      onNotInterested={() => alert('Entendido. Mostraremos menos contenido como este.')}
-                      onBookmark={() => {
-                        if (item.type === 'POST') {
-                            alert('Guardado (simulado) - API pendiente para posts');
-                        } else {
-                            const type = item.type === 'DOCUMENT' ? 'document' : 'question';
-                            api.post(`/bookmarks/${type}/${item.id}`)
-                               .then(() => alert('Guardado en marcadores'))
-                               .catch(() => alert('Error al guardar'));
-                        }
-                      }}
-                      onExplain={() => alert('Ves esta publicación porque es popular en tu red o sigues al autor.')}
-                      onPrivacy={() => alert('Configuración de privacidad del post (Placeholder)')}
-                    />
-                  </div>
-                  <div className="meta">
-                    {item.type} • 
-                    <span style={{ fontWeight: 'bold', color: '#333' }}> @{item.owner?.username || item.author?.username} </span>
-                    • {new Date(item.createdAt).toLocaleDateString()}
-                  </div>
-                  
-                  {item.type === 'POST' && (
-                    <>
-                      <p style={{ fontSize: '1.1rem', marginBottom: item.imageUrl ? '1rem' : 0 }}>{item.content}</p>
-                      {item.imageUrl && (
-                        <img 
-                          src={`${API_URL}/uploads/${item.imageUrl}`} 
-                          alt="Post content" 
-                          style={{ maxWidth: '100%', borderRadius: '8px', marginBottom: '0.5rem' }} 
-                        />
-                      )}
-                    </>
-                  )}
-
-                  {(item.type === 'DOCUMENT' || item.type === 'QUESTION') && (
-                    <div style={{ display: 'flex', gap: '1rem', marginTop: '0.5rem', position: 'relative' }}>
-                      {item.type === 'DOCUMENT' && item.thumbnailUrl && (
-                          <img src={item.thumbnailUrl} alt="Thumbnail" style={{ width: '60px', height: '60px', objectFit: 'cover', borderRadius: '4px' }} />
-                      )}
-                      <div style={{ flex: 1 }}>
-                          <Link to={item.type === 'DOCUMENT' ? `/documents/${item.id}` : `/aula/${item.id}`} style={{ fontSize: '1.2rem', fontWeight: 'bold', display: 'block', margin: '0 0 0.5rem 0' }}>
-                            {item.title} 
-                            {item.version > 1 && <span style={{ fontSize: '0.8rem', color: '#666', marginLeft: '5px' }}>Actualizado</span>}
-                            {item.qualityStatus === 'VERIFIED' && <span style={{ marginLeft: '5px' }}>✅</span>}
-                          </Link>
-                          <p style={{ margin: 0 }}>{item.description || item.body?.substring(0, 100)}...</p>
-                      </div>
-                      <button 
-                        onClick={() => {
-                            const type = item.type === 'DOCUMENT' ? 'document' : 'question';
-                            api.post(`/bookmarks/${type}/${item.id}`)
-                               .then(() => alert('Marcador actualizado'))
-                               .catch(() => alert('Error al marcar'));
-                        }}
-                        style={{
-                            background: 'transparent',
-                            border: 'none',
-                            fontSize: '1.5rem',
-                            cursor: 'pointer',
-                            alignSelf: 'flex-start',
-                            color: '#bbb'
-                        }}
-                        title="Guardar"
-                      >
-                        🔖
-                      </button>
-                    </div>
-                  )}
-
-                  {item.tags && (
-                    <div style={{ fontSize: '0.9rem', color: '#007bff' }}>
-                      Tags: {Array.isArray(item.tags) ? item.tags.join(', ') : item.tags}
-                    </div>
-                  )}
-
-                  <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginTop: '0.75rem' }}>
-                    <div style={{ display: 'flex', gap: '16px', alignItems: 'center' }}>
-                      <button onClick={() => handleToggleLike(item)} style={{ background: 'transparent', border: 'none', cursor: 'pointer' }}>👍 {item._count?.likes || 0}</button>
-                      <button onClick={() => toggleComments(item)} style={{ background: 'transparent', border: 'none', cursor: 'pointer' }}>💬 {item._count?.comments || 0}</button>
-                      {currentUser?.role === 'ADMIN' && <button disabled style={{ background: 'transparent', border: 'none', cursor: 'not-allowed' }}>📌</button>}
-                    </div>
-                    {item.type === 'QUESTION' && <span>Respuestas: {item._count?.answers || 0}</span>}
-                  </div>
-
-                  {expandedComments[item.id] && (
-                    <div style={{ marginTop: '0.75rem' }}>
-                      <div style={{ display: 'flex', flexDirection: 'column', gap: '8px' }}>
-                        {(commentsData[item.id] || []).map((c: any) => (
-                          <div key={c.id} style={{ display: 'flex', gap: '8px', alignItems: 'flex-start' }}>
-                            <img src={`https://ui-avatars.com/api/?name=${c.author.username}&background=random`} alt="avatar" style={{ width: '24px', height: '24px', borderRadius: '50%' }} />
-                            <div>
-                              <div style={{ fontWeight: 'bold' }}>@{c.author.username}</div>
-                              <div>{c.body}</div>
-                            </div>
-                          </div>
-                        ))}
-                      </div>
-                      <div style={{ display: 'flex', gap: '8px', marginTop: '10px' }}>
-                        <input 
-                          value={newCommentBody[item.id] || ''} 
-                          onChange={e => setNewCommentBody({ ...newCommentBody, [item.id]: e.target.value })} 
-                          placeholder="Escribe un comentario" 
-                          style={{ flex: 1, padding: '8px' }} 
-                        />
-                        <button className="btn btn-sm" onClick={() => submitComment(item)}>Enviar</button>
-                      </div>
-                    </div>
-                  )}
-                </div>
+                <FeedItem
+                  key={item.id}
+                  item={item}
+                  currentUser={currentUser}
+                  views={views[item.id]}
+                  isLiked={likedItems[item.id] || false}
+                  onToggleLike={() => handleToggleLike(item)}
+                  onToggleComments={() => toggleComments(item)}
+                  isCommentsExpanded={expandedComments[item.id]}
+                  comments={commentsData[item.id] || []}
+                  newCommentBody={newCommentBody[item.id] || ''}
+                  onCommentChange={(val) => setNewCommentBody({ ...newCommentBody, [item.id]: val })}
+                  onSubmitComment={() => submitComment(item)}
+                  viewVisibility={viewVisibility[item.id] ?? (isAuthor(item) ? globalViewPublic : false)}
+                  onToggleViewVisibility={() => toggleViewVisibility(item)}
+                  onHide={() => handleHideItem(item.id)}
+                  isAuthor={isAuthor(item)}
+                  shouldShowViews={shouldShowViews(item)}
+                />
               ))}
             </div>
           )}
