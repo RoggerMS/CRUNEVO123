@@ -17,6 +17,7 @@ export default function Aula() {
   const [tagFilter, setTagFilter] = useState(initialTags);
   const [dateFrom, setDateFrom] = useState('');
   const [popularTags, setPopularTags] = useState<{ tag: string; count: number }[]>([]);
+  const hasFilters = useMemo(() => Boolean(query || subject || tagFilter || dateFrom), [query, subject, tagFilter, dateFrom]);
 
   useEffect(() => {
     setLoading(true);
@@ -47,6 +48,13 @@ export default function Aula() {
   }, []);
 
   const formatDate = useMemo(() => (iso: string) => new Date(iso).toLocaleString(), []);
+  const handleClearFilters = () => {
+    setSubject('');
+    setTagFilter('');
+    setDateFrom('');
+    setTab('recent');
+    setSearchParams(new URLSearchParams());
+  };
 
   const handleSearch = (e: React.FormEvent<HTMLFormElement>) => {
     e.preventDefault();
@@ -59,11 +67,8 @@ export default function Aula() {
     setSearchParams(next);
   };
 
-  if (loading) return <div>Loading...</div>;
-  if (error) return <div className="error">{error}</div>;
-
   return (
-    <div className="max-w-7xl mx-auto px-4 py-6">
+    <div className="max-w-7xl mx-auto px-4 py-6 bg-gray-50 min-h-screen">
       <div className="flex justify-between items-center mb-8">
         <div>
           <h1 className="text-3xl font-bold text-gray-900">Aula</h1>
@@ -76,6 +81,13 @@ export default function Aula() {
           <span>✏️</span> Hacer una pregunta
         </Link>
       </div>
+
+      {error && (
+        <div className="mb-6 bg-red-50 border border-red-200 text-red-700 rounded-lg p-4 text-sm flex items-center gap-2">
+          <span>⚠️</span>
+          <span>{error}</span>
+        </div>
+      )}
 
       <div className="bg-white p-5 rounded-xl shadow-sm border border-gray-100 mb-8">
         <form onSubmit={handleSearch} className="flex flex-col gap-5">
@@ -99,35 +111,64 @@ export default function Aula() {
           <div className="flex flex-wrap gap-4 items-center pt-2 border-t border-gray-50">
             <span className="text-sm font-semibold text-gray-700 mr-2">Filtrar por:</span>
             
-            <input 
-              placeholder="Materia (ej. Matemáticas)" 
-              value={subject} 
-              onChange={e => setSubject(e.target.value)} 
+            <input
+              placeholder="Materia (ej. Matemáticas)"
+              value={subject}
+              onChange={e => setSubject(e.target.value)}
               className="border border-gray-300 rounded-lg px-3 py-2 text-sm focus:ring-2 focus:ring-blue-500 outline-none w-48"
             />
-            <input 
-              placeholder="Tags (ej. algebra)" 
-              value={tagFilter} 
-              onChange={e => setTagFilter(e.target.value)} 
+            <input
+              placeholder="Tags (ej. algebra)"
+              value={tagFilter}
+              onChange={e => setTagFilter(e.target.value)}
               className="border border-gray-300 rounded-lg px-3 py-2 text-sm focus:ring-2 focus:ring-blue-500 outline-none w-48"
             />
-            <input 
-              type="date" 
-              value={dateFrom} 
-              onChange={e => setDateFrom(e.target.value)} 
+            <input
+              type="date"
+              value={dateFrom}
+              onChange={e => setDateFrom(e.target.value)}
               className="border border-gray-300 rounded-lg px-3 py-2 text-sm focus:ring-2 focus:ring-blue-500 outline-none"
             />
             
-            {(subject || tagFilter || dateFrom) && (
+            {hasFilters && (
               <button 
                 type="button"
-                onClick={() => { setSubject(''); setTagFilter(''); setDateFrom(''); }}
+                onClick={handleClearFilters}
                 className="text-sm text-red-500 hover:text-red-700 font-medium ml-auto"
               >
                 Limpiar filtros
               </button>
             )}
           </div>
+
+          {hasFilters && (
+            <div className="flex flex-wrap gap-2 text-xs text-gray-600">
+              {query && (
+                <span className="px-3 py-1 bg-blue-50 text-blue-700 rounded-full border border-blue-100 flex items-center gap-2">
+                  Buscando: "{query}"
+                  <button type="button" onClick={handleClearFilters} className="text-blue-500 hover:text-blue-700">✕</button>
+                </span>
+              )}
+              {subject && (
+                <span className="px-3 py-1 bg-gray-100 rounded-full border border-gray-200 flex items-center gap-2">
+                  Materia: {subject}
+                  <button type="button" onClick={() => setSubject('')} className="text-gray-500 hover:text-gray-700">✕</button>
+                </span>
+              )}
+              {tagFilter && (
+                <span className="px-3 py-1 bg-gray-100 rounded-full border border-gray-200 flex items-center gap-2">
+                  Tag: {tagFilter}
+                  <button type="button" onClick={() => setTagFilter('')} className="text-gray-500 hover:text-gray-700">✕</button>
+                </span>
+              )}
+              {dateFrom && (
+                <span className="px-3 py-1 bg-gray-100 rounded-full border border-gray-200 flex items-center gap-2">
+                  Desde: {dateFrom}
+                  <button type="button" onClick={() => setDateFrom('')} className="text-gray-500 hover:text-gray-700">✕</button>
+                </span>
+              )}
+            </div>
+          )}
         </form>
       </div>
 
@@ -159,116 +200,143 @@ export default function Aula() {
             ))}
           </div>
 
-          {questions.map(q => (
-            <div key={q.id} className="bg-white p-6 rounded-xl shadow-sm border border-gray-100 hover:shadow-md transition-all duration-200 group">
-              <div className="flex gap-6">
-                <div className="flex flex-col items-center gap-3 min-w-[70px] text-gray-500">
-                  <div className="text-center">
-                    <span className="block text-xl font-bold text-gray-700">{q.score || 0}</span>
-                    <span className="text-xs font-medium">votos</span>
-                  </div>
-                  <div className={`text-center px-3 py-1.5 rounded-lg w-full ${q._count?.answers === 0 ? 'bg-orange-50 text-orange-700 border border-orange-100' : 'bg-gray-50 border border-gray-100'}`}>
-                    <span className="block text-xl font-bold">{q._count?.answers || 0}</span>
-                    <span className="text-xs font-medium">respu.</span>
-                  </div>
-                  <div className="text-center text-xs mt-1 text-gray-400">
-                    {q.views || 0} vistas
+
+          {loading ? (
+            <div className="space-y-4">
+              {[1, 2, 3].map(s => (
+                <div key={s} className="bg-white p-6 rounded-xl shadow-sm border border-gray-100 animate-pulse">
+                  <div className="flex gap-6">
+                    <div className="flex flex-col items-center gap-3 min-w-[70px]">
+                      <div className="h-10 w-12 bg-gray-200 rounded-md" />
+                      <div className="h-12 w-16 bg-gray-200 rounded-md" />
+                      <div className="h-4 w-14 bg-gray-200 rounded-full" />
+                    </div>
+                    <div className="flex-1 space-y-3">
+                      <div className="flex items-center justify-between">
+                        <div className="h-4 w-2/3 bg-gray-200 rounded" />
+                        <div className="h-4 w-20 bg-gray-200 rounded" />
+                      </div>
+                      <div className="h-16 w-full bg-gray-100 rounded" />
+                      <div className="flex gap-2">
+                        <div className="h-6 w-16 bg-gray-200 rounded-full" />
+                        <div className="h-6 w-16 bg-gray-200 rounded-full" />
+                      </div>
+                    </div>
                   </div>
                 </div>
-
-                <div className="flex-1">
-                  <div className="flex items-start justify-between gap-3 mb-2">
-                    <Link to={`/aula/${q.id}`} className="text-lg font-bold text-gray-900 hover:text-blue-600 hover:underline leading-snug">
-                      {q.title}
-                    </Link>
-                    <div className="flex items-center gap-2 shrink-0">
-                      {q._count?.answers === 0 && (
-                        <span className="bg-orange-100 text-orange-800 text-xs px-2 py-1 rounded-full font-medium">
-                          Sin responder
-                        </span>
-                      )}
-                      {q.subject && (
-                        <span className="bg-indigo-50 text-indigo-700 px-2.5 py-1 rounded-md text-xs font-bold uppercase tracking-wide border border-indigo-100">
-                          {q.subject}
-                        </span>
-                      )}
-                    </div>
-                  </div>
-                  
-                  <p className="text-gray-600 mb-4 line-clamp-2 text-sm leading-relaxed">
-                    {q.excerpt || q.body?.substring(0, 160)}...
-                  </p>
-
-                  <div className="flex items-center justify-between flex-wrap gap-4 pt-2">
-                    <div className="flex flex-wrap gap-2">
-                      {q.tags && q.tags.map((tag: string) => (
-                        <button 
-                          key={tag}
-                          onClick={() => setTagFilter(tag)}
-                          className="bg-gray-100 text-gray-600 px-2.5 py-1 rounded-md text-xs hover:bg-gray-200 transition-colors font-medium"
-                        >
-                          #{tag}
-                        </button>
-                      ))}
-                    </div>
-
-                    <div className="flex items-center gap-3 text-xs text-gray-500">
-                      {q.author && (
-                        <div className="flex items-center gap-2">
-                          <div className="w-6 h-6 rounded-full bg-gray-200 flex items-center justify-center overflow-hidden border border-gray-100">
-                            {q.author.avatar ? (
-                              <img src={q.author.avatar} alt={q.author.username} className="w-full h-full object-cover" />
-                            ) : (
-                              <span className="text-xs font-bold text-gray-500">{q.author.username[0].toUpperCase()}</span>
-                            )}
-                          </div>
-                          <span className="font-medium text-gray-700">@{q.author.username}</span>
-                        </div>
-                      )}
-                      <span className="text-gray-300">•</span>
-                      <span>{formatDate(q.createdAt)}</span>
-                    </div>
-                  </div>
-                  
-                  {q._count?.answers === 0 && (
-                     <div className="mt-4 flex justify-end">
-                        <Link to={`/aula/${q.id}`} className="text-sm font-semibold text-blue-600 hover:text-blue-800 flex items-center gap-1 group-hover:translate-x-1 transition-transform">
-                           Sé el primero en responder →
-                        </Link>
-                     </div>
-                  )}
-                </div>
-              </div>
+              ))}
             </div>
-          ))}
-          
-          {questions.length === 0 && (
-             <div className="text-center py-16 bg-white rounded-xl border-2 border-dashed border-gray-200 flex flex-col items-center">
-                <div className="w-16 h-16 bg-blue-50 text-blue-500 rounded-full flex items-center justify-center mb-4">
-                  <MessageCircle size={32} />
+          ) : (
+            <>
+              {questions.map(q => (
+                <div key={q.id} className="bg-white p-6 rounded-xl shadow-sm border border-gray-100 hover:shadow-md transition-all duration-200 group">
+                  <div className="flex gap-6">
+                    <div className="flex flex-col items-center gap-3 min-w-[70px] text-gray-500">
+                      <div className="text-center">
+                        <span className="block text-xl font-bold text-gray-700">{q.score || 0}</span>
+                        <span className="text-xs font-medium">votos</span>
+                      </div>
+                      <div className={`text-center px-3 py-1.5 rounded-lg w-full ${q._count?.answers === 0 ? 'bg-orange-50 text-orange-700 border border-orange-100' : 'bg-gray-50 border border-gray-100'}`}>
+                        <span className="block text-xl font-bold">{q._count?.answers || 0}</span>
+                        <span className="text-xs font-medium">respu.</span>
+                      </div>
+                      <div className="text-center text-xs mt-1 text-gray-400">
+                        {q.views || 0} vistas
+                      </div>
+                    </div>
+
+                    <div className="flex-1">
+                      <div className="flex items-start justify-between gap-3 mb-2">
+                        <Link to={`/aula/${q.id}`} className="text-lg font-bold text-gray-900 hover:text-blue-600 hover:underline leading-snug">
+                          {q.title}
+                        </Link>
+                        <div className="flex items-center gap-2 shrink-0">
+                          {q._count?.answers === 0 && (
+                            <span className="bg-orange-100 text-orange-800 text-xs px-2 py-1 rounded-full font-medium">
+                              Sin responder
+                            </span>
+                          )}
+                          {q.subject && (
+                            <span className="bg-indigo-50 text-indigo-700 px-2.5 py-1 rounded-md text-xs font-bold uppercase tracking-wide border border-indigo-100">
+                              {q.subject}
+                            </span>
+                          )}
+                        </div>
+                      </div>
+                      
+                      <p className="text-gray-600 mb-4 line-clamp-2 text-sm leading-relaxed">
+                        {q.excerpt || q.body?.substring(0, 160)}...
+                      </p>
+
+                      <div className="flex items-center justify-between flex-wrap gap-4 pt-2">
+                        <div className="flex flex-wrap gap-2">
+                          {q.tags && q.tags.map((tag: string) => (
+                            <button 
+                              key={tag}
+                              onClick={() => setTagFilter(tag)}
+                              className="bg-gray-100 text-gray-600 px-2.5 py-1 rounded-md text-xs hover:bg-gray-200 transition-colors font-medium"
+                            >
+                              #{tag}
+                            </button>
+                          ))}
+                        </div>
+
+                        <div className="flex items-center gap-3 text-xs text-gray-500">
+                          {q.author && (
+                            <div className="flex items-center gap-2">
+                              <div className="w-6 h-6 rounded-full bg-gray-200 flex items-center justify-center overflow-hidden border border-gray-100">
+                                {q.author.avatar ? (
+                                  <img src={q.author.avatar} alt={q.author.username} className="w-full h-full object-cover" />
+                                ) : (
+                                  <span className="text-xs font-bold text-gray-500">{q.author.username[0].toUpperCase()}</span>
+                                )}
+                              </div>
+                              <span className="font-medium text-gray-700">@{q.author.username}</span>
+                            </div>
+                          )}
+                          <span className="text-gray-300">•</span>
+                          <span>{formatDate(q.createdAt)}</span>
+                        </div>
+                      </div>
+                      
+                      {q._count?.answers === 0 && (
+                         <div className="mt-4 flex justify-end">
+                            <Link to={`/aula/${q.id}`} className="text-sm font-semibold text-blue-600 hover:text-blue-800 flex items-center gap-1 group-hover:translate-x-1 transition-transform">
+                               Sé el primero en responder →
+                            </Link>
+                         </div>
+                      )}
+                    </div>
+                  </div>
                 </div>
-                <h3 className="text-xl font-bold text-gray-900 mb-2">Aún no hay preguntas aquí</h3>
-                <p className="text-gray-500 mb-6 max-w-md mx-auto">
-                  Parece que nadie ha preguntado sobre esto. ¡Sé el primero en iniciar la conversación!
-                </p>
-                <div className="flex gap-4">
-                   <button 
-                      onClick={() => {
-                        setSubject(''); setTagFilter(''); setDateFrom('');
-                        setSearchParams(new URLSearchParams());
-                      }} 
-                      className="px-4 py-2 text-gray-600 font-medium hover:text-gray-900 border border-gray-200 rounded-lg hover:bg-gray-50 transition-colors"
-                   >
-                      Limpiar filtros
-                   </button>
-                   <Link 
-                      to="/aula/new" 
-                      className="px-4 py-2 bg-blue-600 text-white font-medium rounded-lg hover:bg-blue-700 transition-colors shadow-sm"
-                   >
-                      Hacer una pregunta
-                   </Link>
-                </div>
-             </div>
+              ))}
+              
+              {questions.length === 0 && (
+                 <div className="text-center py-16 bg-white rounded-xl border-2 border-dashed border-gray-200 flex flex-col items-center">
+                    <div className="w-16 h-16 bg-blue-50 text-blue-500 rounded-full flex items-center justify-center mb-4">
+                      <MessageCircle size={32} />
+                    </div>
+                    <h3 className="text-xl font-bold text-gray-900 mb-2">Aún no hay preguntas aquí</h3>
+                    <p className="text-gray-500 mb-6 max-w-md mx-auto">
+                      Parece que nadie ha preguntado sobre esto. ¡Sé el primero en iniciar la conversación!
+                    </p>
+                    <div className="flex gap-4">
+                       <button 
+                          onClick={handleClearFilters} 
+                          className="px-4 py-2 text-gray-600 font-medium hover:text-gray-900 border border-gray-200 rounded-lg hover:bg-gray-50 transition-colors"
+                       >
+                          Limpiar filtros
+                       </button>
+                       <Link 
+                          to="/aula/new" 
+                          className="px-4 py-2 bg-blue-600 text-white font-medium rounded-lg hover:bg-blue-700 transition-colors shadow-sm"
+                       >
+                          Hacer una pregunta
+                       </Link>
+                    </div>
+                 </div>
+              )}
+            </>
           )}
         </div>
 
