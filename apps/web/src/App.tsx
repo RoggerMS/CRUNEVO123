@@ -21,7 +21,6 @@ import {
   MessageCircle,
   MessageSquare,
   Monitor,
-  Moon,
   Receipt,
   Settings as SettingsIcon,
   Shield,
