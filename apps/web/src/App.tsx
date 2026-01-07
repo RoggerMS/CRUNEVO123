@@ -1,4 +1,4 @@
-import React, { useEffect, useMemo, useState } from 'react';
+import React, { useEffect, useMemo, useRef, useState } from 'react';
 import {
   BrowserRouter,
   Routes,
@@ -11,13 +11,22 @@ import {
 import {
   Bell,
   CalendarDays,
+  ChevronDown,
+  ChevronRight,
   FileText,
   GraduationCap,
+  HelpCircle,
   Home as HomeIcon,
+  LogOut,
   MessageCircle,
+  MessageSquare,
+  Monitor,
+  Moon,
   Receipt,
+  Settings as SettingsIcon,
   Shield,
   Store as StoreIcon,
+  Triangle,
   Users,
   BookOpen,
 } from 'lucide-react';
@@ -111,6 +120,9 @@ function Layout({ children }: { children: React.ReactNode }) {
   const navigate = useNavigate();
   const location = useLocation();
   const [currentUser, setCurrentUser] = useState<any>(null);
+  const [isProfileMenuOpen, setIsProfileMenuOpen] = useState(false);
+  const [isMoreMenuOpen, setIsMoreMenuOpen] = useState(false);
+  const profileMenuRef = useRef<HTMLDivElement | null>(null);
 
   useEffect(() => {
     const token = localStorage.getItem('token');
@@ -120,6 +132,36 @@ function Layout({ children }: { children: React.ReactNode }) {
         .catch(() => {});
     }
   }, []);
+
+  useEffect(() => {
+    const handleClickOutside = (event: MouseEvent) => {
+      if (profileMenuRef.current && !profileMenuRef.current.contains(event.target as Node)) {
+        setIsProfileMenuOpen(false);
+        setIsMoreMenuOpen(false);
+      }
+    };
+
+    const handleEscape = (event: KeyboardEvent) => {
+      if (event.key === 'Escape') {
+        setIsProfileMenuOpen(false);
+        setIsMoreMenuOpen(false);
+      }
+    };
+
+    document.addEventListener('mousedown', handleClickOutside);
+    document.addEventListener('keydown', handleEscape);
+
+    return () => {
+      document.removeEventListener('mousedown', handleClickOutside);
+      document.removeEventListener('keydown', handleEscape);
+    };
+  }, []);
+
+  useEffect(() => {
+    if (!isProfileMenuOpen) {
+      setIsMoreMenuOpen(false);
+    }
+  }, [isProfileMenuOpen]);
 
   const menuSections = useMemo<AppMenuSection[]>(() => {
     const sections: AppMenuSection[] = [
@@ -224,6 +266,8 @@ function Layout({ children }: { children: React.ReactNode }) {
 
   const handleLogout = () => {
     localStorage.removeItem('token');
+    setIsProfileMenuOpen(false);
+    setIsMoreMenuOpen(false);
     navigate('/login');
   };
 
@@ -256,27 +300,117 @@ function Layout({ children }: { children: React.ReactNode }) {
             </Link>
 
             {currentUser ? (
-              <div className="topbar-profile">
-                <Link
-                  to={`/users/${currentUser.id}/profile`}
-                  style={{
-                    display: 'flex',
-                    alignItems: 'center',
-                    gap: '10px',
-                    textDecoration: 'none',
-                    color: 'inherit',
-                  }}
+              <div className="topbar-profile" ref={profileMenuRef}>
+                <button
+                  type="button"
+                  className="topbar-profile-trigger"
+                  onClick={() => setIsProfileMenuOpen((current) => !current)}
+                  aria-expanded={isProfileMenuOpen}
+                  aria-haspopup="true"
                 >
                   <img
                     src={`https://ui-avatars.com/api/?name=${currentUser.username}&background=random`}
                     alt={currentUser.username}
                     className="topbar-avatar"
                   />
-                  <span style={{ fontWeight: 'bold', fontSize: '0.9rem' }}>@{currentUser.username}</span>
-                </Link>
-                <button onClick={handleLogout} className="btn btn-sm btn-secondary">
-                  Logout
+                  <span className="topbar-profile-name">@{currentUser.username}</span>
+                  <ChevronDown size={16} aria-hidden="true" />
                 </button>
+
+                {isProfileMenuOpen && (
+                  <div className="profile-menu-panel">
+                    <Link
+                      to={`/users/${currentUser.id}/profile`}
+                      className="profile-menu-profile"
+                      onClick={() => setIsProfileMenuOpen(false)}
+                    >
+                      <img
+                        src={`https://ui-avatars.com/api/?name=${currentUser.username}&background=random`}
+                        alt={currentUser.username}
+                        className="profile-menu-avatar"
+                      />
+                      <div>
+                        <div className="profile-menu-name">{currentUser.username}</div>
+                        <div className="profile-menu-subtitle">Ver tu perfil</div>
+                      </div>
+                    </Link>
+
+                    <div className="profile-menu-divider" />
+
+                    <button type="button" className="profile-menu-item">
+                      <span className="profile-menu-item-icon">
+                        <SettingsIcon size={18} />
+                      </span>
+                      <span className="profile-menu-item-text">Configuración y privacidad</span>
+                      <ChevronRight size={18} className="profile-menu-item-chevron" />
+                    </button>
+
+                    <button type="button" className="profile-menu-item">
+                      <span className="profile-menu-item-icon">
+                        <HelpCircle size={18} />
+                      </span>
+                      <span className="profile-menu-item-text">Ayuda y soporte técnico</span>
+                      <ChevronRight size={18} className="profile-menu-item-chevron" />
+                    </button>
+
+                    <button type="button" className="profile-menu-item">
+                      <span className="profile-menu-item-icon">
+                        <Monitor size={18} />
+                      </span>
+                      <span className="profile-menu-item-text">Pantalla y accesibilidad</span>
+                      <ChevronRight size={18} className="profile-menu-item-chevron" />
+                    </button>
+
+                    <button type="button" className="profile-menu-item">
+                      <span className="profile-menu-item-icon">
+                        <MessageSquare size={18} />
+                      </span>
+                      <span className="profile-menu-item-text">Enviar comentarios</span>
+                      <span className="profile-menu-item-meta">CTRL B</span>
+                    </button>
+
+                    <button type="button" className="profile-menu-item" onClick={handleLogout}>
+                      <span className="profile-menu-item-icon">
+                        <LogOut size={18} />
+                      </span>
+                      <span className="profile-menu-item-text">Cerrar sesión</span>
+                    </button>
+
+                    <div className="profile-menu-footer">
+                      <div className="profile-menu-footer-links">
+                        <button type="button" className="profile-menu-footer-link">Privacidad</button>
+                        <span>·</span>
+                        <button type="button" className="profile-menu-footer-link">Condiciones</button>
+                        <span>·</span>
+                        <button type="button" className="profile-menu-footer-link">Publicidad</button>
+                        <span>·</span>
+                        <button type="button" className="profile-menu-footer-link">Opciones de anuncios</button>
+                        <span className="profile-menu-footer-triangle" aria-hidden="true">
+                          <Triangle size={10} />
+                        </span>
+                        <button type="button" className="profile-menu-footer-link">Cookies</button>
+                        <span>·</span>
+                        <button
+                          type="button"
+                          className="profile-menu-footer-link"
+                          onClick={() => setIsMoreMenuOpen((current) => !current)}
+                          aria-expanded={isMoreMenuOpen}
+                        >
+                          Más
+                        </button>
+                      </div>
+
+                      {isMoreMenuOpen && (
+                        <div className="profile-more-menu">
+                          <button type="button" className="profile-more-menu-item">Información</button>
+                          <button type="button" className="profile-more-menu-item">Empleos</button>
+                          <button type="button" className="profile-more-menu-item">Desarrolladores</button>
+                          <button type="button" className="profile-more-menu-item">Ayuda</button>
+                        </div>
+                      )}
+                    </div>
+                  </div>
+                )}
               </div>
             ) : (
               <span>Loading...</span>
