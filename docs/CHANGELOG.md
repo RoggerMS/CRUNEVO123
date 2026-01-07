@@ -2,6 +2,7 @@
 
 ## [Unreleased]
 ### Added
+- Menú de perfil estilo Facebook con subpaneles (Configuración, Ayuda, Pantalla) y modal de Feedback.
 - Modelo y endpoints de administración para gestionar elementos destacados del sidebar del feed.
 - Soporte en el feed para mostrar ítems dinámicos de publicidad, cursos, eventos y productos.
 - Nueva sección en el panel de administración para crear, editar y ordenar elementos del sidebar.

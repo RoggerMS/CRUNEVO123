@@ -28,6 +28,7 @@ import {
   Triangle,
   Users,
   BookOpen,
+  ArrowLeft,
 } from 'lucide-react';
 
 import { api } from './api/client';
@@ -120,6 +121,8 @@ function Layout({ children }: { children: React.ReactNode }) {
   const location = useLocation();
   const [currentUser, setCurrentUser] = useState<any>(null);
   const [isProfileMenuOpen, setIsProfileMenuOpen] = useState(false);
+  const [activeProfilePanel, setActiveProfilePanel] = useState<'root' | 'settings' | 'help' | 'display'>('root');
+  const [isFeedbackModalOpen, setIsFeedbackModalOpen] = useState(false);
   const [isMoreMenuOpen, setIsMoreMenuOpen] = useState(false);
   const profileMenuRef = useRef<HTMLDivElement | null>(null);
 
@@ -317,97 +320,258 @@ function Layout({ children }: { children: React.ReactNode }) {
                 </button>
 
                 {isProfileMenuOpen && (
-                  <div className="profile-menu-panel">
-                    <Link
-                      to={`/users/${currentUser.id}/profile`}
-                      className="profile-menu-profile"
-                      onClick={() => setIsProfileMenuOpen(false)}
-                    >
-                      <img
-                        src={`https://ui-avatars.com/api/?name=${currentUser.username}&background=random`}
-                        alt={currentUser.username}
-                        className="profile-menu-avatar"
-                      />
-                      <div>
-                        <div className="profile-menu-name">{currentUser.username}</div>
-                        <div className="profile-menu-subtitle">Ver tu perfil</div>
-                      </div>
-                    </Link>
-
-                    <div className="profile-menu-divider" />
-
-                    <button type="button" className="profile-menu-item">
-                      <span className="profile-menu-item-icon">
-                        <SettingsIcon size={18} />
-                      </span>
-                      <span className="profile-menu-item-text">Configuración y privacidad</span>
-                      <ChevronRight size={18} className="profile-menu-item-chevron" />
-                    </button>
-
-                    <button type="button" className="profile-menu-item">
-                      <span className="profile-menu-item-icon">
-                        <HelpCircle size={18} />
-                      </span>
-                      <span className="profile-menu-item-text">Ayuda y soporte técnico</span>
-                      <ChevronRight size={18} className="profile-menu-item-chevron" />
-                    </button>
-
-                    <button type="button" className="profile-menu-item">
-                      <span className="profile-menu-item-icon">
-                        <Monitor size={18} />
-                      </span>
-                      <span className="profile-menu-item-text">Pantalla y accesibilidad</span>
-                      <ChevronRight size={18} className="profile-menu-item-chevron" />
-                    </button>
-
-                    <button type="button" className="profile-menu-item">
-                      <span className="profile-menu-item-icon">
-                        <MessageSquare size={18} />
-                      </span>
-                      <span className="profile-menu-item-text">Enviar comentarios</span>
-                      <span className="profile-menu-item-meta">CTRL B</span>
-                    </button>
-
-                    <button type="button" className="profile-menu-item" onClick={handleLogout}>
-                      <span className="profile-menu-item-icon">
-                        <LogOut size={18} />
-                      </span>
-                      <span className="profile-menu-item-text">Cerrar sesión</span>
-                    </button>
-
-                    <div className="profile-menu-footer">
-                      <div className="profile-menu-footer-links">
-                        <button type="button" className="profile-menu-footer-link">Privacidad</button>
-                        <span>·</span>
-                        <button type="button" className="profile-menu-footer-link">Condiciones</button>
-                        <span>·</span>
-                        <button type="button" className="profile-menu-footer-link">Publicidad</button>
-                        <span>·</span>
-                        <button type="button" className="profile-menu-footer-link">Opciones de anuncios</button>
-                        <span className="profile-menu-footer-triangle" aria-hidden="true">
-                          <Triangle size={10} />
-                        </span>
-                        <button type="button" className="profile-menu-footer-link">Cookies</button>
-                        <span>·</span>
-                        <button
-                          type="button"
-                          className="profile-menu-footer-link"
-                          onClick={() => setIsMoreMenuOpen((current) => !current)}
-                          aria-expanded={isMoreMenuOpen}
-                        >
-                          Más
-                        </button>
-                      </div>
-
-                      {isMoreMenuOpen && (
-                        <div className="profile-more-menu">
-                          <button type="button" className="profile-more-menu-item">Información</button>
-                          <button type="button" className="profile-more-menu-item">Empleos</button>
-                          <button type="button" className="profile-more-menu-item">Desarrolladores</button>
-                          <button type="button" className="profile-more-menu-item">Ayuda</button>
+                  <div className="profile-menu-panel" role="menu">
+                    {/* ROOT PANEL */}
+                    {activeProfilePanel === 'root' && (
+                      <>
+                        <div className="profile-menu-header-card">
+                          <Link
+                            to={`/users/${currentUser.id}/profile`}
+                            className="profile-menu-profile"
+                            onClick={() => setIsProfileMenuOpen(false)}
+                          >
+                            <img
+                              src={`https://ui-avatars.com/api/?name=${currentUser.username}&background=random`}
+                              alt={currentUser.username}
+                              className="profile-menu-avatar"
+                            />
+                            <div>
+                              <div className="profile-menu-name">{currentUser.username}</div>
+                              <div className="profile-menu-subtitle">Ver tu perfil</div>
+                            </div>
+                          </Link>
                         </div>
-                      )}
-                    </div>
+
+                        <div className="profile-menu-divider" />
+
+                        <div className="profile-menu-list">
+                          <button
+                            type="button"
+                            className="profile-menu-item"
+                            onClick={() => setActiveProfilePanel('settings')}
+                          >
+                            <span className="profile-menu-item-icon">
+                              <SettingsIcon size={20} />
+                            </span>
+                            <span className="profile-menu-item-text">Configuración y privacidad</span>
+                            <ChevronRight size={22} className="profile-menu-item-chevron" />
+                          </button>
+
+                          <button
+                            type="button"
+                            className="profile-menu-item"
+                            onClick={() => setActiveProfilePanel('help')}
+                          >
+                            <span className="profile-menu-item-icon">
+                              <HelpCircle size={20} />
+                            </span>
+                            <span className="profile-menu-item-text">Ayuda y soporte técnico</span>
+                            <ChevronRight size={22} className="profile-menu-item-chevron" />
+                          </button>
+
+                          <button
+                            type="button"
+                            className="profile-menu-item"
+                            onClick={() => setActiveProfilePanel('display')}
+                          >
+                            <span className="profile-menu-item-icon">
+                              <Monitor size={20} />
+                            </span>
+                            <span className="profile-menu-item-text">Pantalla y accesibilidad</span>
+                            <ChevronRight size={22} className="profile-menu-item-chevron" />
+                          </button>
+
+                          <button
+                            type="button"
+                            className="profile-menu-item"
+                            onClick={handleOpenFeedback}
+                          >
+                            <span className="profile-menu-item-icon">
+                              <MessageSquare size={20} />
+                            </span>
+                            <span className="profile-menu-item-text">Enviar comentarios</span>
+                          </button>
+
+                          <button type="button" className="profile-menu-item" onClick={handleLogout}>
+                            <span className="profile-menu-item-icon">
+                              <LogOut size={20} />
+                            </span>
+                            <span className="profile-menu-item-text">Cerrar sesión</span>
+                          </button>
+                        </div>
+
+                        <div className="profile-menu-footer">
+                          <div className="profile-menu-footer-links">
+                            <button type="button" className="profile-menu-footer-link">Privacidad</button>
+                            <span>·</span>
+                            <button type="button" className="profile-menu-footer-link">Condiciones</button>
+                            <span>·</span>
+                            <button type="button" className="profile-menu-footer-link">Publicidad</button>
+                            <span>·</span>
+                            <button type="button" className="profile-menu-footer-link">Opciones de anuncios</button>
+                            <span className="profile-menu-footer-triangle" aria-hidden="true">
+                              <Triangle size={10} />
+                            </span>
+                            <button type="button" className="profile-menu-footer-link">Cookies</button>
+                            <span>·</span>
+                            <button
+                              type="button"
+                              className="profile-menu-footer-link"
+                              onClick={() => setIsMoreMenuOpen((current) => !current)}
+                              aria-expanded={isMoreMenuOpen}
+                            >
+                              Más
+                            </button>
+                          </div>
+
+                          {isMoreMenuOpen && (
+                            <div className="profile-more-menu">
+                              <button type="button" className="profile-more-menu-item">Información</button>
+                              <button type="button" className="profile-more-menu-item">Empleos</button>
+                              <button type="button" className="profile-more-menu-item">Desarrolladores</button>
+                              <button type="button" className="profile-more-menu-item">Ayuda</button>
+                            </div>
+                          )}
+                        </div>
+                      </>
+                    )}
+
+                    {/* SETTINGS PANEL */}
+                    {activeProfilePanel === 'settings' && (
+                      <div className="profile-subpanel">
+                        <div className="profile-subpanel-header">
+                          <button
+                            className="profile-menu-back-btn"
+                            onClick={() => setActiveProfilePanel('root')}
+                            aria-label="Volver"
+                          >
+                            <ArrowLeft size={20} />
+                          </button>
+                          <h2>Configuración y privacidad</h2>
+                        </div>
+                        <div className="profile-menu-list">
+                          <button type="button" className="profile-menu-item">
+                            <span className="profile-menu-item-icon">
+                              <SettingsIcon size={20} />
+                            </span>
+                            <span className="profile-menu-item-text">Configuración</span>
+                          </button>
+                          <button type="button" className="profile-menu-item">
+                            <span className="profile-menu-item-icon">
+                              <Monitor size={20} />
+                            </span>
+                            <span className="profile-menu-item-text">Idioma</span>
+                          </button>
+                          <button type="button" className="profile-menu-item">
+                            <span className="profile-menu-item-icon">
+                              <Shield size={20} />
+                            </span>
+                            <span className="profile-menu-item-text">Comprobación rápida de privacidad</span>
+                          </button>
+                        </div>
+                      </div>
+                    )}
+
+                    {/* HELP PANEL */}
+                    {activeProfilePanel === 'help' && (
+                      <div className="profile-subpanel">
+                        <div className="profile-subpanel-header">
+                          <button
+                            className="profile-menu-back-btn"
+                            onClick={() => setActiveProfilePanel('root')}
+                            aria-label="Volver"
+                          >
+                            <ArrowLeft size={20} />
+                          </button>
+                          <h2>Ayuda y soporte técnico</h2>
+                        </div>
+                        <div className="profile-menu-list">
+                          <button type="button" className="profile-menu-item">
+                            <span className="profile-menu-item-icon">
+                              <HelpCircle size={20} />
+                            </span>
+                            <span className="profile-menu-item-text">Servicio de ayuda</span>
+                          </button>
+                          <button type="button" className="profile-menu-item">
+                            <span className="profile-menu-item-icon">
+                              <MessageSquare size={20} />
+                            </span>
+                            <span className="profile-menu-item-text">Buzón de ayuda</span>
+                          </button>
+                          <button type="button" className="profile-menu-item">
+                            <span className="profile-menu-item-icon">
+                              <Shield size={20} />
+                            </span>
+                            <span className="profile-menu-item-text">Reportar un problema</span>
+                          </button>
+                        </div>
+                      </div>
+                    )}
+
+                    {/* DISPLAY PANEL */}
+                    {activeProfilePanel === 'display' && (
+                      <div className="profile-subpanel">
+                        <div className="profile-subpanel-header">
+                          <button
+                            className="profile-menu-back-btn"
+                            onClick={() => setActiveProfilePanel('root')}
+                            aria-label="Volver"
+                          >
+                            <ArrowLeft size={20} />
+                          </button>
+                          <h2>Pantalla y accesibilidad</h2>
+                        </div>
+                        <div className="profile-menu-list">
+                          <div className="profile-menu-section">
+                            <div className="profile-menu-section-header">
+                              <div className="profile-menu-item-icon">
+                                <Monitor size={20} />
+                              </div>
+                              <div className="profile-menu-section-title-group">
+                                <span>Modo oscuro</span>
+                                <p>Ajusta el aspecto de CRUNEVO para reducir el brillo y dar un descanso a la vista.</p>
+                              </div>
+                            </div>
+                            <div className="profile-menu-radios">
+                              <label className="profile-menu-radio">
+                                <span>Desactivado</span>
+                                <input type="radio" name="darkmode" defaultChecked />
+                              </label>
+                              <label className="profile-menu-radio">
+                                <span>Activado</span>
+                                <input type="radio" name="darkmode" />
+                              </label>
+                              <label className="profile-menu-radio">
+                                <span>Automático</span>
+                                <input type="radio" name="darkmode" />
+                              </label>
+                            </div>
+                          </div>
+                          
+                          <div className="profile-menu-section">
+                            <div className="profile-menu-section-header">
+                              <div className="profile-menu-item-icon">
+                                <Monitor size={20} />
+                              </div>
+                              <div className="profile-menu-section-title-group">
+                                <span>Modo compacto</span>
+                                <p>Reduce el tamaño de la fuente para que quepa más contenido en la pantalla.</p>
+                              </div>
+                            </div>
+                            <div className="profile-menu-radios">
+                              <label className="profile-menu-radio">
+                                <span>Desactivado</span>
+                                <input type="radio" name="compactmode" defaultChecked />
+                              </label>
+                              <label className="profile-menu-radio">
+                                <span>Activado</span>
+                                <input type="radio" name="compactmode" />
+                              </label>
+                            </div>
+                          </div>
+                        </div>
+                      </div>
+                    )}
                   </div>
                 )}
               </div>
@@ -418,6 +582,7 @@ function Layout({ children }: { children: React.ReactNode }) {
         </header>
 
         {children}
+        <FeedbackModal />
       </div>
     </div>
   );
@@ -616,6 +781,61 @@ function AppContent() {
             </PrivateRoute>
           }
         />
+        <Route
+          path="/clubs/:id"
+          element={
+            <PrivateRoute>
+              <ClubDetail />
+            </PrivateRoute>
+          }
+        />
+        <Route
+          path="/events"
+          element={
+            <PrivateRoute>
+              <Events />
+            </PrivateRoute>
+          }
+        />
+        <Route
+          path="/admin"
+          element={
+            <PrivateRoute>
+              <AdminPanel />
+            </PrivateRoute>
+          }
+        />
+
+        <Route
+          path="/ai"
+          element={
+            <div className="card">
+              <h3>AI Module</h3>
+              <p>Coming soon...</p>
+            </div>
+          }
+        />
+        <Route
+          path="/courses"
+          element={
+            <div className="card">
+              <h3>Courses Module</h3>
+              <p>Coming soon...</p>
+            </div>
+          }
+        />
+      </Routes>
+    </Layout>
+  );
+}
+
+export default function App() {
+  return (
+    <BrowserRouter>
+      <AppContent />
+    </BrowserRouter>
+  );
+}
         <Route
           path="/clubs/:id"
           element={
