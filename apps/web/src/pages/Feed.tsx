@@ -26,6 +26,7 @@ export default function Feed() {
   const [viewVisibility, setViewVisibility] = useState<Record<string, boolean>>({});
   const [globalViewPublic, setGlobalViewPublic] = useState(false);
   const [likedItems, setLikedItems] = useState<Record<string, boolean>>({});
+  const [isComposerOpen, setIsComposerOpen] = useState(false);
 
   useEffect(() => {
     const storedPref = localStorage.getItem('globalViewPublic');
@@ -123,6 +124,14 @@ export default function Feed() {
     }
   };
 
+  const openComposer = () => setIsComposerOpen(true);
+
+  const closeComposer = () => {
+    setIsComposerOpen(false);
+    setPreview(null);
+    setImage(null);
+  };
+
   const typeToPath = (t: 'POST' | 'DOCUMENT' | 'QUESTION') => {
     if (t === 'POST') return 'post';
     if (t === 'DOCUMENT') return 'document';
@@ -218,114 +227,137 @@ export default function Feed() {
 
       <div className="feed-grid">
         <div>
-          <div className="card" style={{ padding: '1rem', marginBottom: '2rem' }}>
-            <form onSubmit={handlePost}>
-              <div style={{ display: 'flex', gap: '1rem', marginBottom: '1rem' }}>
-                {currentUser ? (
-                   <img 
-                      src={`https://ui-avatars.com/api/?name=${currentUser.username}&background=random`} 
-                      alt="Avatar" 
-                      style={{ width: '48px', height: '48px', borderRadius: '50%' }}
-                    />
-                ) : (
-                    <div style={{ width: '48px', height: '48px', borderRadius: '50%', background: '#eee' }} />
-                )}
-                
-                <textarea
-                  placeholder={`¿Qué quieres compartir hoy${currentUser ? ', ' + currentUser.username : ''}?`}
-                  value={newPost}
-                  onChange={e => setNewPost(e.target.value)}
-                  style={{
-                    width: '100%',
-                    border: 'none',
-                    resize: 'none',
-                    outline: 'none',
-                    fontSize: '1.1rem',
-                    fontFamily: 'inherit',
-                    minHeight: '80px',
-                    padding: '10px 0'
-                  }}
+          <div className="card feed-composer">
+            <div className="feed-composer-header">
+              {currentUser ? (
+                <img
+                  src={`https://ui-avatars.com/api/?name=${currentUser.username}&background=random`}
+                  alt="Avatar"
+                  className="feed-composer-avatar"
                 />
-              </div>
+              ) : (
+                <div className="feed-composer-avatar feed-composer-avatar--empty" />
+              )}
+              <button type="button" className="feed-composer-trigger" onClick={openComposer}>
+                {`¿Qué estás pensando${currentUser ? ', ' + currentUser.username : ''}?`}
+              </button>
+            </div>
+            <div className="feed-composer-actions">
+              <button type="button" onClick={openComposer}>
+                📄 Documento
+              </button>
+              <button type="button" onClick={openComposer}>
+                ❓ Pregunta
+              </button>
+              <button type="button" onClick={openComposer}>
+                📷 Foto
+              </button>
+              <button type="button" onClick={openComposer}>
+                🌍 Visibilidad
+              </button>
+              <button type="button" onClick={openComposer}>
+                📊 Encuesta
+              </button>
+              <button type="button" onClick={openComposer}>
+                🎉 Evento
+              </button>
+            </div>
+          </div>
 
-              {preview && (
-                <div style={{ position: 'relative', marginBottom: '1rem', display: 'inline-block' }}>
-                  <img src={preview} alt="Preview" style={{ maxWidth: '100%', maxHeight: '300px', borderRadius: '8px' }} />
-                  <button 
-                    type="button"
-                    onClick={() => { setImage(null); setPreview(null); }}
-                    style={{
-                      position: 'absolute',
-                      top: '5px',
-                      right: '5px',
-                      background: 'rgba(0,0,0,0.5)',
-                      color: 'white',
-                      border: 'none',
-                      borderRadius: '50%',
-                      width: '24px',
-                      height: '24px',
-                      cursor: 'pointer'
-                    }}
-                  >
+          {isComposerOpen && (
+            <div className="feed-composer-overlay" role="presentation" onClick={closeComposer}>
+              <div className="feed-composer-modal" role="dialog" aria-modal="true" onClick={(event) => event.stopPropagation()}>
+                <div className="feed-composer-modal-header">
+                  <h3>Crear publicación</h3>
+                  <button type="button" className="feed-composer-close" onClick={closeComposer} aria-label="Cerrar">
                     ✕
                   </button>
                 </div>
-              )}
-              
-              <div style={{ 
-                  display: 'flex', 
-                  justifyContent: 'space-between', 
-                  alignItems: 'center',
-                  borderTop: '1px solid #eee',
-                  paddingTop: '0.8rem'
-                }}>
-                  <div style={{ display: 'flex', gap: '15px', alignItems: 'center' }}>
-                     <Link to="/documents/new" style={{ textDecoration: 'none', color: '#666', display: 'flex', alignItems: 'center', gap: '5px' }}>
-                        📄 Documento
-                     </Link>
-                     <Link to="/aula/new" style={{ textDecoration: 'none', color: '#666', display: 'flex', alignItems: 'center', gap: '5px' }}>
-                        ❓ Pregunta
-                     </Link>
-                     <input 
-                      type="file" 
-                      ref={fileInputRef} 
-                      onChange={handleFileChange} 
-                      accept="image/*" 
-                      style={{ display: 'none' }} 
-                     />
-                     <span 
-                      onClick={() => fileInputRef.current?.click()}
-                      style={{ color: '#666', cursor: 'pointer', display: 'flex', alignItems: 'center', gap: '5px' }}
-                     >
-                      📷 Foto
-                     </span>
-                     <div style={{ display: 'flex', gap: '8px', alignItems: 'center' }}>
-                        <span style={{ color: '#666' }}>Visibilidad</span>
-                        <select value={visibility} onChange={e => setVisibility(e.target.value as any)} style={{ padding: '6px' }}>
+                <form onSubmit={handlePost}>
+                  <div className="feed-composer-modal-user">
+                    {currentUser ? (
+                      <img
+                        src={`https://ui-avatars.com/api/?name=${currentUser.username}&background=random`}
+                        alt="Avatar"
+                      />
+                    ) : (
+                      <div className="feed-composer-avatar feed-composer-avatar--empty" />
+                    )}
+                    <div>
+                      <div className="feed-composer-username">
+                        {currentUser ? currentUser.username : 'Invitado'}
+                      </div>
+                      <div className="feed-composer-visibility">
+                        <span>Visibilidad</span>
+                        <select value={visibility} onChange={e => setVisibility(e.target.value as any)}>
                           <option value="PUBLIC">Público</option>
                           <option value="CLUB">Club</option>
                         </select>
                         {visibility === 'CLUB' && (
-                          <select value={selectedClub} onChange={e => setSelectedClub(e.target.value)} style={{ padding: '6px' }}>
+                          <select value={selectedClub} onChange={e => setSelectedClub(e.target.value)}>
                             <option value="">Selecciona club</option>
                             {clubs.map(c => <option key={c.id} value={c.id}>{c.name}</option>)}
                           </select>
                         )}
-                     </div>
+                      </div>
+                    </div>
                   </div>
-                  <button 
-                    className="btn" 
-                    disabled={!newPost.trim() && !image || (visibility === 'CLUB' && !selectedClub)}
-                    style={{ 
-                        opacity: (!newPost.trim() && !image) || (visibility === 'CLUB' && !selectedClub) ? 0.6 : 1, 
-                        cursor: (!newPost.trim() && !image) || (visibility === 'CLUB' && !selectedClub) ? 'default' : 'pointer' 
-                    }}
-                  >
-                    Publicar
-                  </button>
+
+                  <textarea
+                    className="feed-composer-textarea"
+                    placeholder={`¿Qué quieres compartir hoy${currentUser ? ', ' + currentUser.username : ''}?`}
+                    value={newPost}
+                    onChange={e => setNewPost(e.target.value)}
+                  />
+
+                  {preview && (
+                    <div className="feed-composer-preview">
+                      <img src={preview} alt="Preview" />
+                      <button type="button" onClick={() => { setImage(null); setPreview(null); }}>
+                        ✕
+                      </button>
+                    </div>
+                  )}
+
+                  <div className="feed-composer-attachment">
+                    <span>Agregar a tu publicación</span>
+                    <div className="feed-composer-attachment-actions">
+                      <Link to="/documents/new">📄 Documento</Link>
+                      <Link to="/aula/new">❓ Pregunta</Link>
+                      <input
+                        type="file"
+                        ref={fileInputRef}
+                        onChange={handleFileChange}
+                        accept="image/*"
+                        style={{ display: 'none' }}
+                      />
+                      <button type="button" onClick={() => fileInputRef.current?.click()}>
+                        📷 Foto
+                      </button>
+                      <button type="button">
+                        📝 Apuntes
+                      </button>
+                      <button type="button">
+                        🧠 Encuesta
+                      </button>
+                      <button type="button">
+                        📍 Ubicación
+                      </button>
+                    </div>
+                  </div>
+
+                  <div className="feed-composer-footer">
+                    <button
+                      className="btn"
+                      disabled={!newPost.trim() && !image || (visibility === 'CLUB' && !selectedClub)}
+                    >
+                      Publicar
+                    </button>
+                  </div>
+                </form>
               </div>
-            </form>
-          </div>
+            </div>
+          )}
           
           {items.length === 0 ? (
             <div className="card">No content yet.</div>
