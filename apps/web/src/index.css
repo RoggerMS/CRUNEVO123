@@ -913,6 +913,206 @@ th, td {
   gap: 1.5rem;
 }
 
+.feed-composer {
+  padding: 1rem;
+  margin-bottom: 2rem;
+  border: 1px solid #e5e7eb;
+}
+
+.feed-composer-header {
+  display: flex;
+  align-items: center;
+  gap: 0.9rem;
+}
+
+.feed-composer-avatar {
+  width: 44px;
+  height: 44px;
+  border-radius: 50%;
+  object-fit: cover;
+}
+
+.feed-composer-avatar--empty {
+  background: #e5e7eb;
+}
+
+.feed-composer-trigger {
+  flex: 1;
+  text-align: left;
+  border: 1px solid #e5e7eb;
+  background: #f8fafc;
+  border-radius: 999px;
+  padding: 0.7rem 1rem;
+  color: #6b7280;
+  font-size: 1rem;
+  cursor: pointer;
+}
+
+.feed-composer-actions {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 0.6rem 1.2rem;
+  padding-top: 0.8rem;
+  border-top: 1px solid #f1f5f9;
+  margin-top: 0.8rem;
+}
+
+.feed-composer-actions button {
+  border: none;
+  background: transparent;
+  color: #4b5563;
+  font-weight: 500;
+  cursor: pointer;
+  display: inline-flex;
+  align-items: center;
+  gap: 0.35rem;
+}
+
+.feed-composer-overlay {
+  position: fixed;
+  inset: 0;
+  background: rgba(15, 23, 42, 0.45);
+  display: flex;
+  align-items: flex-start;
+  justify-content: center;
+  padding: 4rem 1rem 2rem;
+  z-index: 40;
+}
+
+.feed-composer-modal {
+  background: #fff;
+  border-radius: 16px;
+  width: min(640px, 95vw);
+  padding: 1.5rem;
+  box-shadow: 0 20px 45px rgba(15, 23, 42, 0.25);
+}
+
+.feed-composer-modal-header {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  border-bottom: 1px solid #e5e7eb;
+  padding-bottom: 0.8rem;
+  margin-bottom: 1rem;
+}
+
+.feed-composer-close {
+  border: none;
+  background: #f3f4f6;
+  border-radius: 999px;
+  width: 32px;
+  height: 32px;
+  cursor: pointer;
+  font-size: 1rem;
+}
+
+.feed-composer-modal-user {
+  display: flex;
+  gap: 0.8rem;
+  align-items: center;
+  margin-bottom: 1rem;
+}
+
+.feed-composer-modal-user img {
+  width: 40px;
+  height: 40px;
+  border-radius: 50%;
+}
+
+.feed-composer-username {
+  font-weight: 600;
+}
+
+.feed-composer-visibility {
+  display: flex;
+  gap: 0.6rem;
+  align-items: center;
+  flex-wrap: wrap;
+  margin-top: 0.3rem;
+  color: #6b7280;
+  font-size: 0.9rem;
+}
+
+.feed-composer-visibility select {
+  border: 1px solid #e5e7eb;
+  border-radius: 8px;
+  padding: 0.35rem 0.5rem;
+  font-size: 0.9rem;
+}
+
+.feed-composer-textarea {
+  width: 100%;
+  min-height: 120px;
+  border: none;
+  resize: vertical;
+  font-size: 1.1rem;
+  font-family: inherit;
+  outline: none;
+  color: #111827;
+  margin-bottom: 1rem;
+}
+
+.feed-composer-preview {
+  position: relative;
+  margin-bottom: 1rem;
+  display: inline-block;
+}
+
+.feed-composer-preview img {
+  max-width: 100%;
+  max-height: 300px;
+  border-radius: 12px;
+}
+
+.feed-composer-preview button {
+  position: absolute;
+  top: 8px;
+  right: 8px;
+  border: none;
+  background: rgba(15, 23, 42, 0.65);
+  color: #fff;
+  border-radius: 999px;
+  width: 26px;
+  height: 26px;
+  cursor: pointer;
+}
+
+.feed-composer-attachment {
+  border: 1px solid #e5e7eb;
+  border-radius: 12px;
+  padding: 0.8rem 1rem;
+  margin-bottom: 1rem;
+}
+
+.feed-composer-attachment > span {
+  font-weight: 600;
+  display: block;
+  margin-bottom: 0.6rem;
+}
+
+.feed-composer-attachment-actions {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 0.6rem 1rem;
+}
+
+.feed-composer-attachment-actions a,
+.feed-composer-attachment-actions button {
+  border: none;
+  background: #f8fafc;
+  border-radius: 999px;
+  padding: 0.35rem 0.8rem;
+  color: #374151;
+  font-weight: 500;
+  text-decoration: none;
+  cursor: pointer;
+}
+
+.feed-composer-footer {
+  display: flex;
+  justify-content: flex-end;
+}
+
 .feed-card {
   position: relative;
   transition: box-shadow 0.2s ease, transform 0.2s ease;
