@@ -1,6 +1,6 @@
 import { useEffect, useState, useRef, useCallback } from 'react';
 import { api } from '../api/client';
-import { useNavigate } from 'react-router-dom';
+import { Link } from 'react-router-dom';
 import { formatApiErrorMessage } from '../api/error';
 import { Settings } from 'lucide-react';
 import FeedItem from '../components/FeedItem';
@@ -26,10 +26,6 @@ export default function Feed() {
   const [viewVisibility, setViewVisibility] = useState<Record<string, boolean>>({});
   const [globalViewPublic, setGlobalViewPublic] = useState(false);
   const [likedItems, setLikedItems] = useState<Record<string, boolean>>({});
-  const [activeType, setActiveType] = useState<'DOCUMENT' | 'QUESTION' | 'PHOTO'>('DOCUMENT');
-  const [isVisibilityMenuOpen, setIsVisibilityMenuOpen] = useState(false);
-  const visibilityRef = useRef<HTMLDivElement>(null);
-  const navigate = useNavigate();
 
   useEffect(() => {
     const storedPref = localStorage.getItem('globalViewPublic');
@@ -97,7 +93,6 @@ export default function Feed() {
       const file = e.target.files[0];
       setImage(file);
       setPreview(URL.createObjectURL(file));
-      setActiveType('PHOTO');
     }
   };
 
@@ -206,29 +201,6 @@ export default function Feed() {
     return viewVisibility[item.id] === true;
   };
 
-  const handleSelectType = (type: 'DOCUMENT' | 'QUESTION' | 'PHOTO') => {
-    setActiveType(type);
-    if (type === 'DOCUMENT') navigate('/documents/new');
-    if (type === 'QUESTION') navigate('/aula/new');
-    if (type === 'PHOTO') fileInputRef.current?.click();
-  };
-
-  const visibilityLabel = () => {
-    if (visibility === 'PUBLIC') return 'Público';
-    const selectedClubName = clubs.find((c) => c.id === selectedClub)?.name;
-    return selectedClubName ? `Club: ${selectedClubName}` : 'Club (elige)';
-  };
-
-  useEffect(() => {
-    const handleClickOutside = (event: MouseEvent) => {
-      if (visibilityRef.current && !visibilityRef.current.contains(event.target as Node)) {
-        setIsVisibilityMenuOpen(false);
-      }
-    };
-    document.addEventListener('mousedown', handleClickOutside);
-    return () => document.removeEventListener('mousedown', handleClickOutside);
-  }, []);
-
   if (loading && items.length === 0) return <div>Loading...</div>;
   if (error) {
       return (
@@ -300,103 +272,58 @@ export default function Feed() {
                 </div>
               )}
               
-              <div className="composer-footer">
-                <div className="composer-type-toggle" role="group" aria-label="Tipo de publicación">
-                  <button
-                    type="button"
-                    className="composer-type-segment"
-                    data-active={activeType === 'DOCUMENT'}
-                    onClick={() => handleSelectType('DOCUMENT')}
-                  >
-                    <span aria-hidden>📄</span> Documento
-                  </button>
-                  <button
-                    type="button"
-                    className="composer-type-segment"
-                    data-active={activeType === 'QUESTION'}
-                    onClick={() => handleSelectType('QUESTION')}
-                  >
-                    <span aria-hidden>❓</span> Pregunta
-                  </button>
-                  <button
-                    type="button"
-                    className="composer-type-segment"
-                    data-active={activeType === 'PHOTO'}
-                    onClick={() => handleSelectType('PHOTO')}
-                  >
-                    <span aria-hidden>📷</span> Foto
-                  </button>
-                </div>
-
-                <div className="composer-visibility" ref={visibilityRef}>
-                  <button
-                    type="button"
-                    className="composer-visibility-chip"
-                    aria-expanded={isVisibilityMenuOpen}
-                    onClick={() => setIsVisibilityMenuOpen((prev) => !prev)}
-                  >
-                    <span className="composer-visibility-label">Visibilidad</span>
-                    <span className="composer-visibility-value">{visibilityLabel()}</span>
-                    <span className="composer-visibility-caret" aria-hidden>▾</span>
-                  </button>
-                  {isVisibilityMenuOpen && (
-                    <div className="composer-visibility-menu">
-                      <button
-                        type="button"
-                        className="composer-visibility-option"
-                        data-active={visibility === 'PUBLIC'}
-                        onClick={() => {
-                          setVisibility('PUBLIC');
-                          setSelectedClub('');
-                          setIsVisibilityMenuOpen(false);
-                        }}
-                      >
-                        Público
-                      </button>
-                      <button
-                        type="button"
-                        className="composer-visibility-option"
-                        data-active={visibility === 'CLUB'}
-                        onClick={() => {
-                          setVisibility('CLUB');
-                          setIsVisibilityMenuOpen(true);
-                        }}
-                      >
-                        Club
-                      </button>
-                      {visibility === 'CLUB' && (
-                        <div className="composer-visibility-select">
-                          <label htmlFor="club-select">Alcance</label>
-                          <select
-                            id="club-select"
-                            value={selectedClub}
-                            onChange={(e) => setSelectedClub(e.target.value)}
-                          >
+              <div style={{ 
+                  display: 'flex', 
+                  justifyContent: 'space-between', 
+                  alignItems: 'center',
+                  borderTop: '1px solid #eee',
+                  paddingTop: '0.8rem'
+                }}>
+                  <div style={{ display: 'flex', gap: '15px', alignItems: 'center' }}>
+                     <Link to="/documents/new" style={{ textDecoration: 'none', color: '#666', display: 'flex', alignItems: 'center', gap: '5px' }}>
+                        📄 Documento
+                     </Link>
+                     <Link to="/aula/new" style={{ textDecoration: 'none', color: '#666', display: 'flex', alignItems: 'center', gap: '5px' }}>
+                        ❓ Pregunta
+                     </Link>
+                     <input 
+                      type="file" 
+                      ref={fileInputRef} 
+                      onChange={handleFileChange} 
+                      accept="image/*" 
+                      style={{ display: 'none' }} 
+                     />
+                     <span 
+                      onClick={() => fileInputRef.current?.click()}
+                      style={{ color: '#666', cursor: 'pointer', display: 'flex', alignItems: 'center', gap: '5px' }}
+                     >
+                      📷 Foto
+                     </span>
+                     <div style={{ display: 'flex', gap: '8px', alignItems: 'center' }}>
+                        <span style={{ color: '#666' }}>Visibilidad</span>
+                        <select value={visibility} onChange={e => setVisibility(e.target.value as any)} style={{ padding: '6px' }}>
+                          <option value="PUBLIC">Público</option>
+                          <option value="CLUB">Club</option>
+                        </select>
+                        {visibility === 'CLUB' && (
+                          <select value={selectedClub} onChange={e => setSelectedClub(e.target.value)} style={{ padding: '6px' }}>
                             <option value="">Selecciona club</option>
                             {clubs.map(c => <option key={c.id} value={c.id}>{c.name}</option>)}
                           </select>
-                        </div>
-                      )}
-                    </div>
-                  )}
-                </div>
-
-                <div className="composer-spacer" aria-hidden />
-
-                <button 
-                  className="btn composer-publish-btn" 
-                  disabled={!newPost.trim() && !image || (visibility === 'CLUB' && !selectedClub)}
-                >
-                  Publicar
-                </button>
+                        )}
+                     </div>
+                  </div>
+                  <button 
+                    className="btn" 
+                    disabled={!newPost.trim() && !image || (visibility === 'CLUB' && !selectedClub)}
+                    style={{ 
+                        opacity: (!newPost.trim() && !image) || (visibility === 'CLUB' && !selectedClub) ? 0.6 : 1, 
+                        cursor: (!newPost.trim() && !image) || (visibility === 'CLUB' && !selectedClub) ? 'default' : 'pointer' 
+                    }}
+                  >
+                    Publicar
+                  </button>
               </div>
-              <input 
-                type="file" 
-                ref={fileInputRef} 
-                onChange={handleFileChange} 
-                accept="image/*" 
-                style={{ display: 'none' }} 
-              />
             </form>
           </div>
           
