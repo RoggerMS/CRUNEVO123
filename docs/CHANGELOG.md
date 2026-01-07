@@ -12,6 +12,7 @@
 - Renovado el diseño del listado de Aula para alinearlo con la experiencia de creación y detalle (tarjetas, filtros y tabs unificados).
 - Página de creación y detalle de preguntas en Aula rediseñadas para alinearse visualmente y corregir estilos rotos.
 - Limpieza de importaciones sin uso en App para evitar fallos de build en web.
+- Corrección de JSX duplicado en el router principal para restaurar el build del frontend.
 
 ## [Iteración 5] - 2026-01-03
 ### Added
