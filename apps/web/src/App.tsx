@@ -45,6 +45,7 @@ import MyPurchases from './pages/MyPurchases';
 import Messages from './pages/Messages';
 import Notifications from './pages/Notifications';
 import Events from './pages/Events';
+import Settings from './pages/Settings';
 
 import AppMenu, { type AppMenuSection } from './components/AppMenu';
 import Sidebar from './components/Sidebar';
@@ -443,6 +444,16 @@ function AppContent() {
             </PrivateRoute>
           }
         />
+        <Route
+          path="/settings"
+          element={
+            <PrivateRoute>
+              <Settings />
+            </PrivateRoute>
+          }
+        />
+        <Route path="/setting" element={<Navigate to="/settings" />} />
+        <Route path="/configuracion" element={<Navigate to="/settings" />} />
 
         {/* Legacy routes redirect to Aula */}
         <Route path="/questions/new" element={<Navigate to="/aula/new" />} />
