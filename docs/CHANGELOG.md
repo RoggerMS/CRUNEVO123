@@ -13,6 +13,7 @@
 - Página de creación y detalle de preguntas en Aula rediseñadas para alinearse visualmente y corregir estilos rotos.
 - Limpieza de importaciones sin uso en App para evitar fallos de build en web.
 - Corrección de JSX duplicado en el router principal para restaurar el build del frontend.
+- Restaurado el modal de feedback y la navegación de paneles del menú de perfil para evitar errores de compilación.
 
 ## [Iteración 5] - 2026-01-03
 ### Added

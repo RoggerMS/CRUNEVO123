@@ -147,6 +147,7 @@ function Layout({ children }: { children: React.ReactNode }) {
       if (event.key === 'Escape') {
         setIsProfileMenuOpen(false);
         setIsMoreMenuOpen(false);
+        setIsFeedbackModalOpen(false);
       }
     };
 
@@ -162,6 +163,7 @@ function Layout({ children }: { children: React.ReactNode }) {
   useEffect(() => {
     if (!isProfileMenuOpen) {
       setIsMoreMenuOpen(false);
+      setActiveProfilePanel('root');
     }
   }, [isProfileMenuOpen]);
 
@@ -271,6 +273,16 @@ function Layout({ children }: { children: React.ReactNode }) {
     setIsProfileMenuOpen(false);
     setIsMoreMenuOpen(false);
     navigate('/login');
+  };
+
+  const handleOpenFeedback = () => {
+    setIsFeedbackModalOpen(true);
+    setIsProfileMenuOpen(false);
+    setIsMoreMenuOpen(false);
+  };
+
+  const handleCloseFeedback = () => {
+    setIsFeedbackModalOpen(false);
   };
 
   // Routes where we don't show the main app layout (auth pages, landing)
@@ -582,7 +594,28 @@ function Layout({ children }: { children: React.ReactNode }) {
         </header>
 
         {children}
-        <FeedbackModal />
+        {isFeedbackModalOpen && (
+          <div className="feedback-modal-overlay" role="presentation" onClick={handleCloseFeedback}>
+            <div className="feedback-modal" role="dialog" aria-modal="true" onClick={(event) => event.stopPropagation()}>
+              <div className="feedback-modal-header">
+                <h2>Enviar comentarios</h2>
+                <button type="button" className="feedback-modal-close" onClick={handleCloseFeedback}>
+                  ✕
+                </button>
+              </div>
+              <p>Tu opinión nos ayuda a mejorar CRUNEVO.</p>
+              <textarea placeholder="Cuéntanos qué te gustaría mejorar..." rows={4} />
+              <div className="feedback-modal-actions">
+                <button type="button" className="btn btn-secondary" onClick={handleCloseFeedback}>
+                  Cancelar
+                </button>
+                <button type="button" className="btn">
+                  Enviar
+                </button>
+              </div>
+            </div>
+          </div>
+        )}
       </div>
     </div>
   );
