@@ -1,0 +1,82 @@
+.settings-page {
+  text-align: left;
+}
+
+.settings-header {
+  display: flex;
+  align-items: flex-start;
+  justify-content: space-between;
+  gap: 1rem;
+  margin-bottom: 1.5rem;
+}
+
+.settings-badge {
+  background: #eef2ff;
+  color: #3730a3;
+}
+
+.settings-note ul {
+  margin: 0;
+  padding-left: 1.2rem;
+  display: grid;
+  gap: 0.4rem;
+}
+
+.settings-grid {
+  display: grid;
+  gap: 1.5rem;
+}
+
+.settings-section {
+  display: grid;
+  gap: 1.25rem;
+}
+
+.settings-section-list {
+  display: grid;
+  gap: 1rem;
+}
+
+.settings-item {
+  display: flex;
+  justify-content: space-between;
+  gap: 1rem;
+  padding: 1rem;
+  border: 1px solid var(--border-color);
+  border-radius: 8px;
+  background: #fafafa;
+}
+
+.settings-item-title {
+  font-weight: 600;
+}
+
+.settings-item-description {
+  margin: 0.2rem 0 0;
+}
+
+.settings-item-detail {
+  margin: 0.4rem 0 0;
+  color: var(--text-muted);
+  font-size: 0.85rem;
+}
+
+.settings-status {
+  align-self: start;
+  white-space: nowrap;
+}
+
+.settings-status-ready {
+  background: #ecfdf3;
+  color: #047857;
+}
+
+.settings-status-soon {
+  background: #fef3c7;
+  color: #92400e;
+}
+
+.settings-status-planned {
+  background: #e0f2fe;
+  color: #075985;
+}
